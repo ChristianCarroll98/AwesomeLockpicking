@@ -39,3 +39,23 @@ luac.out
 *.x86_64
 *.hex
 
+
+
+# Visual Studio Code
+.vscode/
+
+# Windows System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+~$*
+
+# Project Zomboid / Java Compiled
+classes/
+*.class
+*.pyc
+
+# Local backup / archive folders (Optional)
+backup/
+*.zip
+*.rar
