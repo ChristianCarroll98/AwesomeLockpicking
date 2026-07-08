@@ -1,0 +1,18 @@
+module AwesomeLockpicking
+{
+    imports
+    {
+        Base
+    }
+
+    character_profession_definition AwesomeLockpicking:MasterLocksmith
+    {
+        CharacterProfession = AwesomeLockpicking:MasterLocksmith,
+        Cost = 2,
+        UIName = UI_prof_awesomelockpicking_MasterLocksmith,
+        UIDescription = UI_prof_awesomelockpicking_MasterLocksmith_desc,
+        IconPathName = profession_masterlocksmith,
+        GrantedTraits = AwesomeLockpicking:Locksmith_prof,
+        XPBoosts = Lockpicking=2,
+    }
+}

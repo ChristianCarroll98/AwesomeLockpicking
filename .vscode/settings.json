@@ -1,0 +1,25 @@
+{
+    "Lua.workspace.library": [
+        "c:\\Users\\chris\\.vscode\\extensions\\ilka.umbrella-vscode-1.2.3\\plugin\\library\\runtime",
+        "c:\\Users\\chris\\.vscode\\extensions\\ilka.umbrella-vscode-1.2.3\\plugin\\library\\natives\\umbrella",
+        "${addons}/umbrella-unstable/module/library"
+    ],
+    "Lua.runtime.version": "Lua 5.1",
+    "Lua.runtime.path": [
+        "?.lua",
+        "?/init.lua",
+        "server/?.lua"
+    ],
+    "Lua.completion.requireSeparator": "/",
+    "Lua.runtime.builtin": {
+        "debug": "disable",
+        "io": "disable",
+        "package": "disable"
+    },
+    "Lua.workspace.checkThirdParty": false,
+    "Lua.diagnostics.disable": [
+        "undefined-global",
+        "undefined-field",
+        "inject-field"
+    ]
+}

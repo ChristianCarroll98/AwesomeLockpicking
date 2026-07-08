@@ -1,0 +1,26 @@
+module AwesomeLockpicking
+{
+    character_trait_definition AwesomeLockpicking:Locksmith
+    {
+        CharacterTrait = AwesomeLockpicking:Locksmith,
+        UIName = UI_trait_awesomelockpicking_locksmith,
+        Cost = 1,
+        UIDescription = UI_trait_awesomelockpicking_locksmith_desc,
+        IsProfessionTrait = false,
+        DisabledInMultiplayer = false,
+        XPBoosts = Lockpicking=2,
+        MutuallyExclusiveTraits = AwesomeLockpicking:Locksmith_prof,
+    }
+
+    character_trait_definition AwesomeLockpicking:Locksmith_prof
+    {
+        CharacterTrait = AwesomeLockpicking:Locksmith_prof,
+        UIName = UI_trait_awesomelockpicking_locksmith,
+        Cost = 0,
+        UIDescription = UI_trait_awesomelockpicking_locksmith_desc,
+        IsProfessionTrait = true,
+        DisabledInMultiplayer = false,
+        XPBoosts = Lockpicking=2,
+        MutuallyExclusiveTraits = AwesomeLockpicking:Locksmith,
+    }
+}

@@ -1,0 +1,103 @@
+module AwesomeLockpicking
+{
+    imports
+	{
+		Base
+	}
+
+    item ForgedLockpickingTools
+    {
+		DisplayCategory = Tool,
+        Icon = ForgedLockpickingTools,
+        Weight = 0.2,
+        ItemType = base:normal,
+        ConditionMax = 20,
+        ConditionLowerChance = 8,
+		BreakSound = Weapon/Melee/BladeShort/Multitool/Break,
+        Tags = LockpickTool,
+    }
+
+    item ProfessionalLockpickingTools
+    {
+		DisplayCategory = Tool,
+        Icon = ProfessionalLockpickingTools,
+        Weight = 0.2,
+        ItemType = base:normal,
+        ConditionMax = 120,
+        ConditionLowerChance = 12,
+		BreakSound = Weapon/Melee/BladeShort/Multitool/Break,
+        Tags = LockpickTool,
+    }
+
+    /************************Literature************************/
+
+    item BookLockpicking1
+	{
+		DisplayCategory = SkillBook,
+		ItemType = base:literature,aaaa
+		Weight = 1,
+		Icon = LockpickingBook,
+		LvlSkillTrained = 1,
+		NumLevelsTrained = 2,
+		NumberOfPages = 220,
+		SkillTrained = Lockpicking,
+		StaticModel = BookLightBlue,
+		WorldStaticModel = BookLightBlue_Ground,
+	}
+
+	item BookLockpicking2
+	{
+		DisplayCategory = SkillBook,
+		ItemType = base:literature,
+		Weight = 1,
+		Icon = LockpickingBook,
+		LvlSkillTrained	= 3,
+		NumLevelsTrained = 2,
+		NumberOfPages = 260,
+		SkillTrained = Lockpicking,
+		StaticModel = BookLightBlue,
+		WorldStaticModel = BookLightBlue_Ground,
+	}
+
+	item BookLockpicking3
+	{
+		DisplayCategory = SkillBook,
+		ItemType = base:literature,
+		Weight = 1,
+		Icon = LockpickingBook,
+		LvlSkillTrained = 5,
+		NumLevelsTrained = 2,
+		NumberOfPages = 300,
+		SkillTrained = Lockpicking,
+		StaticModel = BookLightBlue,
+		WorldStaticModel = BookLightBlue_Ground,
+	}
+
+	item BookLockpicking4
+	{
+		DisplayCategory = SkillBook,
+		ItemType = base:literature,
+		Weight = 1,
+		Icon = LockpickingBook,
+		LvlSkillTrained = 7,
+		NumLevelsTrained = 2,
+		NumberOfPages = 340,
+		SkillTrained = Lockpicking,
+		StaticModel = BookLightBlue,
+		WorldStaticModel = BookLightBlue_Ground,
+	}
+
+	item BookLockpicking5
+	{
+		DisplayCategory = SkillBook,
+		ItemType = base:literature,
+		Weight = 1,
+		Icon = LockpickingBook,
+		LvlSkillTrained = 9,
+		NumLevelsTrained = 2,
+		NumberOfPages = 380,
+		SkillTrained = Lockpicking,
+		StaticModel = BookLightBlue,
+		WorldStaticModel = BookLightBlue_Ground,
+	}
+}
