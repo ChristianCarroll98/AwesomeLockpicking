@@ -34,7 +34,7 @@ module AwesomeLockpicking
     item BookLockpicking1
 	{
 		DisplayCategory = SkillBook,
-		ItemType = base:literature,aaaa
+		ItemType = base:literature,
 		Weight = 1,
 		Icon = LockpickingBook,
 		LvlSkillTrained = 1,

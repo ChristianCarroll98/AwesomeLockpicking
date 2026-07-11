@@ -4,7 +4,7 @@ module AwesomeLockpicking
     {
         time = 300,
         SkillRequired = Lockpicking:1;Blacksmith:1,
-        needTobeLearn = false,
+        needTobeLearn = true,
         timedAction = HammerMetalStanding,
         xpAward = Blacksmith:35,
         AutoLearnAll = Blacksmith:2;Lockpicking:2,

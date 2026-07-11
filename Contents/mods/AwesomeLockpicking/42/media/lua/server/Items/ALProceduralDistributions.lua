@@ -1,9 +1,15 @@
+require 'Vehicles/VehicleDistributions'
 require 'Items/ProceduralDistributions'
 
--- Professional Lockpicking Tools - rare
-local proData = {name = "AwesomeLockpicking.ProfessionalLockpickingTools", weights = {0.5, 1, 1, 0.5, 0.5, 1, 2, 1.5, 1, 2, 1.5, 1, 0.5, 1.5, 1, 0.5, 0.5, 0.5, 2, 1, 1, 1, 0.5, 0.5}}
 
-local proTargets = {
+local locksmithVan = VehicleDistributions["Van_LocksmithTruckBed"]
+table.insert(locksmithVan.items, "AwesomeLockpicking.ProfessionalLockpickingTools")
+table.insert(locksmithVan.items, 20)
+
+
+local weights = {0.5, 1, 1, 0.5, 0.5, 1, 2, 1.5, 1, 2, 1.5, 1, 0.5, 1.5, 1, 0.5, 0.5, 0.5, 2, 1, 1, 1, 0.5, 0.5, 5}
+
+local toolTargetLocations = {
     "ArmyBunkerLockers",
     "ArmyHangarMechanics",
     "ArmyHangarTools",
@@ -27,14 +33,15 @@ local proTargets = {
     "WeldingWorkshopTools",
     "WireFactoryTools",
     "UniversityStorageScience",
-    "WoodcraftDudeCounter"
+    "WoodcraftDudeCounter",
+    "ToolStoreKeymaking"
 }
 
-for i, distribution in ipairs(proTargets) do
+for i, distribution in ipairs(toolTargetLocations) do
     local list = ProceduralDistributions["list"][distribution]
     if list and list.items then
-        table.insert(list.items, proData.name)
-        table.insert(list.items, proData.weights[i])
+        table.insert(list.items, "AwesomeLockpicking.ProfessionalLockpickingTools")
+        table.insert(list.items, weights[i])
     end
 end
 
@@ -46,7 +53,7 @@ local bookData = {
     {name = "AwesomeLockpicking.BookLockpicking5", weights = {1, 2, 4, 0.5, 1, 0.5, 0.5, 1, 1, 1}}
 }
 
-local targets = {
+local bookTargetLocations = {
     "BookstoreBooks",
     "LibraryBooks",
     "UniversityLibrary",
@@ -59,7 +66,7 @@ local targets = {
     "HardwareStoreTools"
 }
 
-for i, distribution in ipairs(targets) do
+for i, distribution in ipairs(bookTargetLocations) do
     local list = ProceduralDistributions["list"][distribution]
     if list and list.items then
         for _, book in ipairs(bookData) do

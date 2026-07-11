@@ -1,4 +1,5 @@
 {
-  "ContextMenu_PickLockWithPaperclip": "Pick lock with paperclip and screwdriver",
-  "ContextMenu_PickLockWithLockpick": "Pick lock with lockpicking tools"
+  "ContextMenu_PickLockWithProfessionalLockpick": "Pick Lock (Professional Lockpicking Tools)",
+  "ContextMenu_PickLockWithForgedLockpick": "Pick Lock (Forged Lockpicking Tools)",
+  "ContextMenu_PickLockWithPaperclip": "Pick Lock (Paperclip and screwdriver)"
 }
