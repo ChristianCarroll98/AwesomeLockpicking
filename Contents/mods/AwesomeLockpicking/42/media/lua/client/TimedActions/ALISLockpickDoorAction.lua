@@ -1,6 +1,10 @@
 require "TimedActions/ISBaseTimedAction"
 require "ALSharedUtils"
 
+---@class ALISLockpickDoorAction : ISBaseTimedAction
+---@field character IsoPlayer
+---@field target IsoObject | IsoDoor
+---@field tool InventoryItem
 ALISLockpickDoorAction = ISBaseTimedAction:derive("ISLockpickDoorAction")
 
 function ALISLockpickDoorAction:isValid()
@@ -23,7 +27,7 @@ end
 function ALISLockpickDoorAction:perform()
 
     if isClient() and not isServer() then -- is pure client connected to server
-    
+
         local commands = ALSharedUtils.ALCommandList
         local args = {
             x = self.target:getX(),
@@ -48,15 +52,14 @@ function ALISLockpickDoorAction:getDuration()
     return 60
 end
 
-function ALISLockpickDoorAction:new(character, target, tool)
+function ALISLockpickDoorAction:new(player, target, tool)
     local LockpickDurationList = {215, 175, 155, 140, 125, 115, 105, 100, 95, 90, 85}
-    local o = ISBaseTimedAction.new(self, character)
-    o.character = character
-    o.playerNum = character:getPlayerNum()
+    local o = ISBaseTimedAction.new(self, player)
+    o.character = player
     o.target = target
     o.tool = tool
     o.stopOnWalk = true
     o.stopOnRun = true
-    o.maxTime = LockpickDurationList[character:getPerkLevel(Perks.Lockpicking) + 1] -- smoothish logarithmic curve, fast table lookup.
+    o.maxTime = LockpickDurationList[player:getPerkLevel(Perks.Lockpicking) + 1] -- smoothish logarithmic curve, fast table lookup.
     return o
 end

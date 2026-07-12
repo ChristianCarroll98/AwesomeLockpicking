@@ -17,10 +17,5 @@
         "package": "disable"
     },
     "Lua.workspace.checkThirdParty": false,
-    "Lua.diagnostics.disable": [
-        "undefined-global",
-        "undefined-field",
-        "inject-field"
-    ],
     "editor.rulers": [120]
 }
