@@ -1,0 +1,33 @@
+==== Multiplayer now fully functional! ====
+Please give my mod a thumbs up if you like it!!
+
+Adds a new skill - Lockpicking! Vanilla style chance based lockpicking action, speed and success affected by skill level.
+
+A horde nearby and you need to get into a building quietly, but its locked and the windows wont open?! Garage door locked with no windows, but you're too weak to break it to access the juicy loot inside? Well, now with the right tools you can quietly open doors without the key, with some patience and luck!
+
+Right click a door. In the context menu, there will be a new option for lockpicking the door. You can use a paperclip and screwdriver, but the paperclip may break on failure.
+
+I have added a couple of unique items to help!
+- A craftable Forged Lockpicking Tool Set - Improves lockpicking success chance over paperclip and screwdriver. Can be crafted at any forge with two small metal pieces with at least Lockpicking level 1 and Blacksmithing level 2. Recipe unlocks at Lockpicking level 3 and Blacksmithing level 4.
+- A rare lootable Professional Lockpicking Tool Set - Highest success chance bonus. Can be researched to unlock forged set with at least level 1 in Lockpicking or Blacksmithing.
+
+Each of the lockpicking set items have durability, with the professional set lasting significantly longer.
+
+New Trait: Locksmith - Gives the player lockpicking +2 and a +75% XP bonus.
+
+New Profession: Master Locksmith - Start with a set of professional lockpicking tools! Gives the Locksmith trait and an additional +2 Lockpicking with 2 points left to spend.
+
+The mod also adds a set of skill books for the new skill.
+
+The mod settings include a global success chance modifier (>1 means higher chance) and whether to allow high security door picking - default false.
+
+UPDATE: Added XP multiplier in sandbox settings. Fixed broken lockpicking tool items still letting the lockpick option show. Fixed require failed ISWalkToTimedAction bug. Fixed researching forged lockpicking tools recipe not granting recipe.
+
+Coming Soon: +1 Lockpicking with Burglar occupation, 3d models for all new items, lockpicking vehicles!
+
+Mod Poster art commissioned from Smallishbat at @smallishbat (discord username) and https://smallishbat.itch.io/
+
+Note: Not recommended to use this mod with any other lockpicking mod. In my tests it DOES work with existing saves but I reccomend making a backup before adding just in case.
+
+Workshop ID: 3758561559
+Mod ID: AwesomeLockpicking
