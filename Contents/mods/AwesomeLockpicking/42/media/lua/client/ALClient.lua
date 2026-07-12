@@ -1,5 +1,5 @@
 require 'TimedActions/ALISLockpickDoorAction'
-require 'TimedActions/ISWalkToTimedAction'
+require 'TimedActions/WalkToTimedAction'
 require 'ALSharedUtils'
 
 local function isValidLockpickingTarget(target)
@@ -111,7 +111,6 @@ local function addLockpickingOption(playerNum, context, worldobjects, ...)
 end
 
 local function ALOnServerCommand(module, command, args)
-    print("[DEBUG] AwesomeLockpicking - ALOnServerCommand called with params module: " .. tostring(module) .. ", command: " .. tostring(command) .. ", args: " .. tostring(args))
     local commands = ALSharedUtils.ALCommandList
     if module ~= commands.ALModule then return end
     
@@ -122,7 +121,6 @@ local function ALOnServerCommand(module, command, args)
     end
 
     if command == commands.setHaloNoteClient then
-        print("[DEBUG] AwesomeLockpicking - setHaloNote")
         player:setHaloNote(getText(args.text))
     end
 end

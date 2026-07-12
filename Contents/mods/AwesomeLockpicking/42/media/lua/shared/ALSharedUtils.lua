@@ -60,11 +60,9 @@ local function applyLockpickAttempt(player, target, tool)
         local maintenanceMod = player:getMaintenanceMod()
         local finalChancePool = baseChancePool + maintenanceMod
         
-        if not success then
-            finalChancePool = finalChancePool * 0.5
+        if success then
+            finalChancePool = finalChancePool * 2
         end
-
-        finalChancePool = math.floor(finalChancePool + 0.5)
         
         if ZombRand(finalChancePool) == 0 then
             tool:setCondition(tool:getCondition() - 1)
@@ -99,7 +97,13 @@ local function applyLockpickAttempt(player, target, tool)
         player:setHaloNote(getText("IGUI_ingame_LockpickingTaskFailed"))
     end
 
-    player:getXp():AddXP(Perks.Lockpicking, xpGain, false, true, false)
+    local settings = SandboxVars and SandboxVars.AwesomeLockpicking
+    if not settings then
+        print("[ERROR] AwesomeLockpicking - could not retrieve sandbox settings in applyLockpickAttempt")
+        return
+    end
+
+    player:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * xpGain, false, true, false)
 end
 
 

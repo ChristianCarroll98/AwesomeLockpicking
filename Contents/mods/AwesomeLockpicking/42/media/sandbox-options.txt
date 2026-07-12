@@ -10,3 +10,8 @@ option AwesomeLockpicking.AllowLockpickingHighSecurityDoors
     type = boolean, default = false,
     page = AwesomeLockpicking, translation = AllowLockpickingHighSecurityDoors,
 }
+option AwesomeLockpicking.XPMultiplier
+{
+    type = double, min = 0.1, max = 100.0, default = 1.0,
+    page = AwesomeLockpicking, translation = XPMultiplier,
+}

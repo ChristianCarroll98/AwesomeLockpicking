@@ -21,5 +21,6 @@
         "undefined-global",
         "undefined-field",
         "inject-field"
-    ]
+    ],
+    "editor.rulers": [120]
 }
