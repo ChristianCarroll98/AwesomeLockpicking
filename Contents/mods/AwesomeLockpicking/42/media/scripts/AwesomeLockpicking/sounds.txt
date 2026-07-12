@@ -1,0 +1,11 @@
+module AwesomeLockpicking
+{
+    sound BreakLockPick {
+        category = Item,
+        clip {
+            file = media/sound/Items/MetalSnap.ogg,
+            distanceMax = 30,
+            volume = 1.0,
+        }
+    }
+}

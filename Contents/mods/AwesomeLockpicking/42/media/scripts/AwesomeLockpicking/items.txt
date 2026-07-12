@@ -12,8 +12,8 @@ module AwesomeLockpicking
         Weight = 0.2,
         ItemType = base:normal,
         ConditionMax = 20,
-        ConditionLowerChance = 8,
-		BreakSound = Weapon/Melee/BladeShort/Multitool/Break,
+        ConditionLowerChance = 10,
+		BreakSound = BreakLockPick,
         Tags = LockpickTool,
     }
 
@@ -24,8 +24,8 @@ module AwesomeLockpicking
         Weight = 0.2,
         ItemType = base:normal,
         ConditionMax = 120,
-        ConditionLowerChance = 12,
-		BreakSound = Weapon/Melee/BladeShort/Multitool/Break,
+        ConditionLowerChance = 10,
+		BreakSound = BreakLockPick,
         Tags = LockpickTool,
     }
 
