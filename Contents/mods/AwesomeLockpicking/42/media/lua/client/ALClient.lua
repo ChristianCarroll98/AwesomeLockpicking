@@ -31,40 +31,34 @@ local function isValidLockpickingTarget(target)
     return false
 end
 
+local function findFirstUnbroken(items)
+    for i = 0, items:size() - 1 do
+        local item = items:get(i)
+        if item then
+            if not item.getCondition or (item:getCondition() > 0) then return item end
+        end
+    end
+    return nil
+end
+
 local function getValidLockpickTool(player)
     if not player then return nil end
 
     local inv = player:getInventory()
     if not inv then return nil end
 
-    local tool = inv:getFirstTypeRecurse("AwesomeLockpicking.ProfessionalLockpickingTools")
+    local tool = findFirstUnbroken(inv:getAllTypeRecurse("AwesomeLockpicking.ProfessionalLockpickingTools"))
+    if not tool then tool = findFirstUnbroken(inv:getAllTypeRecurse("AwesomeLockpicking.ForgedLockpickingTools")) end
 
-    if not tool then
-        tool = inv:getFirstTypeRecurse("AwesomeLockpicking.ForgedLockpickingTools")
-    end
-
-    if not tool then -- check for paperclip and any not broken item with tag screwdriver
+    if not tool and inv:containsTypeRecurse("Base.Paperclip") then
     
-        local hasPaperclip = inv:containsTypeRecurse("Base.Paperclip")
-        if not hasPaperclip then return nil end
-
         local screwdriverTag = ItemTag.get(ResourceLocation.new("base", "screwdriver"))
         if not screwdriverTag then return nil end
 
         local screwdriverList = ArrayList.new()
         inv:getAllTagRecurse(screwdriverTag, screwdriverList)
 
-        -- iterate through found screwdrivers and set tool to first non-broken found
-        for i = 0, screwdriverList:size() - 1 do
-            local screwdriver = screwdriverList:get(i)
-            if screwdriver then
-                local cond = screwdriver:getCondition()
-                if cond == nil or cond > 0 then
-                    tool = screwdriver
-                    break
-                end
-            end
-        end
+        tool = findFirstUnbroken(screwdriverList)
     end
 
     return tool
