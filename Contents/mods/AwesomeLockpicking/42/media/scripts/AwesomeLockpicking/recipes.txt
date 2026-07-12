@@ -1,13 +1,13 @@
-module AwesomeLockpicking
+module Base
 {
     craftRecipe ForgeLockpickingTools
     {
         time = 300,
-        SkillRequired = Lockpicking:1;Blacksmith:1,
-        needTobeLearn = true,
+        SkillRequired = Lockpicking:1;Blacksmith:2,
+        NeedToBeLearn = true,
         timedAction = HammerMetalStanding,
         xpAward = Blacksmith:35,
-        AutoLearnAll = Blacksmith:2;Lockpicking:2,
+        AutoLearnAll = Lockpicking:3;Blacksmith:4,
         Tags = PrimitiveForge,
         category = Tools,
         inputs

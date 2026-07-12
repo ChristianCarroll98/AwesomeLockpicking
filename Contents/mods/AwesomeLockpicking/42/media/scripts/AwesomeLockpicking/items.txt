@@ -1,10 +1,5 @@
 module AwesomeLockpicking
 {
-    imports
-	{
-		Base
-	}
-
     item ForgedLockpickingTools
     {
 		DisplayCategory = Tool,
@@ -12,8 +7,9 @@ module AwesomeLockpicking
         Weight = 0.2,
         ItemType = base:normal,
         ConditionMax = 20,
-        ConditionLowerChance = 10,
+        ConditionLowerChanceOneIn = 10,
 		BreakSound = BreakLockPick,
+		Researchablerecipes = ForgeLockpickingTools,
     }
 
     item ProfessionalLockpickingTools
@@ -23,8 +19,9 @@ module AwesomeLockpicking
         Weight = 0.2,
         ItemType = base:normal,
         ConditionMax = 120,
-        ConditionLowerChance = 10,
+        ConditionLowerChanceOneIn = 10,
 		BreakSound = BreakLockPick,
+		Researchablerecipes = ForgeLockpickingTools,
     }
 
     /************************Literature************************/
