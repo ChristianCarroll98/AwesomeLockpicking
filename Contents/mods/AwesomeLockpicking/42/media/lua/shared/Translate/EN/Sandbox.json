@@ -1,6 +1,8 @@
 {
     "Sandbox_AwesomeLockpicking": "Awesome Lockpicking",
     "Sandbox_SuccessChanceMultiplier": "Success chance multiplier",
+    "Sandbox_XPMultiplier": "XP Multiplier",
+    "Sandbox_AllowLockpickingVehicleDoors": "Allow Lockpicking of vehicle doors",
     "Sandbox_AllowLockpickingHighSecurityDoors": "Allow Lockpicking of high-security doors",
-    "Sandbox_XPMultiplier": "XP Multiplier"
+    "Sandbox_AllowLockpickingPlayerDoors": "Allow lockpicking of player-built doors"
 }

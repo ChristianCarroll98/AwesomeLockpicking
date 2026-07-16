@@ -1,12 +1,15 @@
+require 'Vehicles/ISUI/ISVehicleMenu'
+
 ALSharedUtils = ALSharedUtils or {}
 
-local function applyLockpickAttempt(player, target, tool)
-    if not player or not target or not tool then
+local function applyLockpickAttempt(playerObj, tool, target, targetType)
+    local targetTypes = ALSharedUtils.ALPickableObjectType
+    if not playerObj or not target or not tool or not targetType or targetType == targetTypes.None then
         print("[ERROR] AwesomeLockpicking - nil param in applyLockpickAttempt")
         return
     end
 
-    local inv = player:getInventory()
+    local inv = playerObj:getInventory()
     if not inv then
         print("[ERROR] AwesomeLockpicking - player:getInventory() returned nil in applyLockpickAttempt")
         return
@@ -30,7 +33,7 @@ local function applyLockpickAttempt(player, target, tool)
         toolType = toolTypes.screwdriver -- any screwdriver if not lockpicking tools
     end
 
-    local baseChance = 20 + (player:getPerkLevel(Perks.Lockpicking) * 7)
+    local baseChance = 20 + (playerObj:getPerkLevel(Perks.Lockpicking) * 7)
 
     local doorMultiplier = 1.0
     local sprite = target:getSprite()
@@ -57,13 +60,13 @@ local function applyLockpickAttempt(player, target, tool)
 
     if tool.getCondition and tool:getCondition() > 0 then
         local baseChancePool = tool:getConditionLowerChance()
-        local maintenanceMod = player:getMaintenanceMod()
+        local maintenanceMod = playerObj:getMaintenanceMod()
         local finalChancePool = baseChancePool + maintenanceMod
-        
+
         if success then
             finalChancePool = finalChancePool * 2
         end
-        
+
         if ZombRand(finalChancePool) == 0 then
             tool:setCondition(tool:getCondition() - 1)
             inv:setDrawDirty(true)
@@ -80,21 +83,21 @@ local function applyLockpickAttempt(player, target, tool)
         end
     end
 
-    local commands = ALSharedUtils.ALCommandList
-
+    local commands = ALSharedUtils.CommandList
     local xpGain = 10
 
-    if success then
-        if (instanceof(target, "IsoDoor") or instanceof(target, "IsoThumpable")) then
-            if target.setLockedByKey then target:setLockedByKey(false) end
-            if target.ToggleDoor then target:ToggleDoor(player) end
-        end
+    if success then -- unlock and open doors.
+        if target.setLockedByKey then target:setLockedByKey(false) end
+        -- if target.setLocked then target:setLocked(false) end
+        if target.setIsLocked then target:setIsLocked(false) end
+        if target.ToggleDoor then target:ToggleDoor(playerObj) end
+
         xpGain = 20
     elseif isServer() then -- fail from server, send halo note text to client
-        sendServerCommand(player, commands.ALModule, commands.setHaloNoteClient,
+        sendServerCommand(playerObj, commands.ALModule, commands.setHaloNoteClient,
             {text = "IGUI_ingame_LockpickingTaskFailed"})
     else
-        player:setHaloNote(getText("IGUI_ingame_LockpickingTaskFailed"))
+        playerObj:setHaloNote(getText("IGUI_ingame_LockpickingTaskFailed"))
     end
 
     local settings = SandboxVars and SandboxVars.AwesomeLockpicking
@@ -103,18 +106,25 @@ local function applyLockpickAttempt(player, target, tool)
         return
     end
 
-    player:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * xpGain, false, true, false)
+    playerObj:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * xpGain, false, true, false)
 end
 
 
 ---------- Enums ----------
-local ALCommandList = {
+local CommandList = {
     ALModule = "ALModule",
     applyLockpickAttemptServer = "applyLockpickAttemptServer",
     setHaloNoteClient = "setHaloNoteClient"
 }
 
+local ALPickableObjectType = {
+    WorldDoor = "WorldDoor",
+    PlayerDoor = "PlayerDoor",
+    VehicleDoor = "VehicleDoor",
+    None = "None"
+}
 
 ---------- Exports ----------
 ALSharedUtils.applyLockpickAttempt = applyLockpickAttempt
-ALSharedUtils.ALCommandList = ALCommandList
+ALSharedUtils.CommandList = CommandList
+ALSharedUtils.ALPickableObjectType = ALPickableObjectType

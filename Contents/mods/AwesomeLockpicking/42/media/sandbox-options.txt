@@ -5,13 +5,23 @@ option AwesomeLockpicking.SuccessChanceModifier
     type = double, min = 0.1, max = 5.0, default = 1.0,
     page = AwesomeLockpicking, translation = SuccessChanceModifier,
 }
+option AwesomeLockpicking.XPMultiplier
+{
+    type = double, min = 0.1, max = 100.0, default = 1.0,
+    page = AwesomeLockpicking, translation = XPMultiplier,
+}
+option AwesomeLockpicking.AllowLockpickingVehicleDoors
+{
+    type = boolean, default = true,
+    page = AwesomeLockpicking, translation = AllowLockpickingVehicleDoors,
+}
 option AwesomeLockpicking.AllowLockpickingHighSecurityDoors
 {
     type = boolean, default = false,
     page = AwesomeLockpicking, translation = AllowLockpickingHighSecurityDoors,
 }
-option AwesomeLockpicking.XPMultiplier
+option AwesomeLockpicking.AllowLockpickingPlayerDoors
 {
-    type = double, min = 0.1, max = 100.0, default = 1.0,
-    page = AwesomeLockpicking, translation = XPMultiplier,
+    type = boolean, default = false,
+    page = AwesomeLockpicking, translation = AllowLockpickingPlayerDoors,
 }
