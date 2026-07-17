@@ -5,7 +5,7 @@ ALSharedUtils = ALSharedUtils or {}
 local function applyLockpickAttempt(playerObj, tool, target, targetType)
     local targetTypes = ALSharedUtils.ALPickableObjectType
     if not playerObj or not target or not tool or not targetType or targetType == targetTypes.None then
-        print("[ERROR] AwesomeLockpicking - nil param in applyLockpickAttempt")
+        print("[ERROR] AwesomeLockpicking - nil param or None targetType in applyLockpickAttempt")
         return
     end
 
@@ -36,15 +36,19 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
     local baseChance = 20 + (playerObj:getPerkLevel(Perks.Lockpicking) * 7)
 
     local doorMultiplier = 1.0
-    local sprite = target:getSprite()
-    local props = sprite and sprite:getProperties()
-    if props then
-        if props:get("HighSecurity") == "true" then
-            doorMultiplier = 0.45
-        elseif props:get("MetalDoor") == "true" then
-            doorMultiplier = 0.75
-        elseif props:get("GlassDoor") == "true" then
-            doorMultiplier = 0.90
+    if targetType == targetTypes.VehicleDoor then
+        doorMultiplier = 0.6
+    else
+        local sprite = target:getSprite()
+        local props = sprite and sprite:getProperties()
+        if props then
+            if props:get("HighSecurity") == "true" then
+                doorMultiplier = 0.45
+            elseif props:get("MetalDoor") == "true" then
+                doorMultiplier = 0.75
+            elseif props:get("GlassDoor") == "true" then
+                doorMultiplier = 0.90
+            end
         end
     end
 
@@ -87,12 +91,52 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
     local xpGain = 10
 
     if success then -- unlock and open doors.
-        if target.setLockedByKey then target:setLockedByKey(false) end
-        -- if target.setLocked then target:setLocked(false) end
-        if target.setIsLocked then target:setIsLocked(false) end
-        if target.ToggleDoor then target:ToggleDoor(playerObj) end
+        if targetType == targetTypes.VehicleDoor then -- borrowed from ISUnlockVehicleDoor:complete()
+            local vehicle = target:getVehicle()
+            if vehicle then
+                if not target then
+                    print('[ERROR] AwesomeLockpicking - no such vehicle part '..tostring(target))
+                    return
+                end
+                local vehicleDoor = target:getDoor()
+                if not vehicleDoor then
+                    print('[ERROR] AwesomeLockpicking - part ' .. target .. ' has no door')
+                    return
+                end
+                vehicleDoor:setLocked(false)
+                vehicle:transmitPartDoor(target) -- required??
+
+                local areaId = target:getArea() -- Grabs layout ID (e.g., "FrontLeft")
+                print("[DEBUG] getArea: " .. tostring(areaId))
+                local seatIndex = vehicle:getScript():getPassengerIndex(areaId) -- Returns 0, 1, 2... or -1
+                print("[DEBUG] seatIndex: " .. tostring(seatIndex))
+                if(seatIndex == -1) then
+                    print("[DEBUG] seatIndex was -1!")
+                else -- enter vehicle
+                    if isServer() then
+                        sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
+                        {vehicle = vehicle, seatIndex = seatIndex})
+                    else
+                        local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
+                        ISTimedActionQueue.add(enterVehicleAction)
+                    end
+                end
+            else
+                print('no such vehicle id='..tostring(vehicle))
+                return
+            end
+        else
+            if targetType == targetTypes.PlayerDoor then
+                if target.setIsLocked then target:setIsLocked(false) end -- PlayerDoor
+
+            elseif targetType == targetTypes.WorldDoor then
+                if target.setLockedByKey then target:setLockedByKey(false) end -- WorldDoor
+            end
+            if target.ToggleDoor then target:ToggleDoor(playerObj) end -- both PlayerDoor and WorldDoor
+        end
 
         xpGain = 20
+
     elseif isServer() then -- fail from server, send halo note text to client
         sendServerCommand(playerObj, commands.ALModule, commands.setHaloNoteClient,
             {text = "IGUI_ingame_LockpickingTaskFailed"})
@@ -114,7 +158,8 @@ end
 local CommandList = {
     ALModule = "ALModule",
     applyLockpickAttemptServer = "applyLockpickAttemptServer",
-    setHaloNoteClient = "setHaloNoteClient"
+    setHaloNoteClient = "setHaloNoteClient",
+    enterVehicle = "enterVehicle"
 }
 
 local ALPickableObjectType = {

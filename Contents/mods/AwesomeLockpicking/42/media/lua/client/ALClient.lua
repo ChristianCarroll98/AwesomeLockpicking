@@ -27,7 +27,6 @@ local function getValidLockpickTool(playerObj)
     if not tool and inv:containsTypeRecurse("Base.Paperclip") then
 
         local screwdriverTag = ItemTag.get(ResourceLocation.new("base", "screwdriver"))
-        if not screwdriverTag then return nil end
 
         local screwdriverList = ArrayList.new()
         inv:getAllTagRecurse(screwdriverTag, screwdriverList)
@@ -51,13 +50,42 @@ local function getContextTextFromLockpickingToolObj(tool)
     return contextText
 end
 
-local function toolIsInMainInventory(player, item)
-    local mainInv = player:getInventory()
-    if mainInv:contains(item) then
-        return true  -- already in main inventory
+local function addLockpickingTaskToQueue(playerObj,  target, targetType, tool)
+
+    local lockpickAction = ALLockpickDoorAction:new(playerObj, target, targetType, tool)
+
+    local inv = playerObj:getInventory()
+    local originalToolContainer = tool:getContainer()
+    local toolInMainInv = inv:contains(tool)
+    local originalPaperclipContainer = nil
+    local paperclip = nil
+    local shouldReturnPaperclip = false
+
+    if not toolInMainInv then -- move lockpicking tool into main inventory
+        ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, tool, originalToolContainer, inv))
     end
 
-    return false
+    -- check for paperclip if tool is screwdriver
+    if tool:hasTag(ItemTag.get(ResourceLocation.new("base", "screwdriver"))) then
+        if not inv:containsType("Base.Paperclip") then
+            paperclip = inv:getFirstTypeRecurse("Base.Paperclip") -- move paperclip into main inventory
+            originalPaperclipContainer = paperclip:getContainer()
+            ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, paperclip, originalPaperclipContainer, inv))
+            shouldReturnPaperclip = true
+        end
+    end
+
+    ISTimedActionQueue.add(lockpickAction)
+
+    -- return lockpicking tool to where it was (make sure still exists)
+    if not toolInMainInv and originalToolContainer and tool then
+        ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, tool, inv, originalToolContainer))
+    end
+
+    -- if shouldReturnPaperclip then move paperclip to where it was (make sure still exists)
+    if shouldReturnPaperclip and originalPaperclipContainer and paperclip then
+        ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, paperclip, inv, originalPaperclipContainer))
+    end
 end
 
 
@@ -114,41 +142,9 @@ local function addLockpickingContextMenuOption(player, context, worldobjects, ..
                 return context.player:DistTo(context.square:getX() + 0.5, context.square:getY() + 0.5) <= 1.5
             end, {player = playerObj, square = target:getSquare()})
 
-            local lockpickAction = ALLockpickDoorAction:new(playerObj, target, targetType, tool)
-
             context:addOption(getText(getContextTextFromLockpickingToolObj(tool)), player, function()
-                local originalToolContainer = tool:getContainer()
-                local inv = playerObj:getInventory()
-                local toolInMainInv = toolIsInMainInventory(playerObj, tool)
-                local originalPaperclipContainer = nil
-                local shouldReturnPaperclip = false
-                if not toolInMainInv then -- move lockpicking tools into main inventory
-                    ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, tool, originalToolContainer, inv))
-                end
-                if tool:hasTag(ItemTag.get(ResourceLocation.new("base", "screwdriver"))) then
-                    if not inv:containsType("Base.Paperclip") then
-                        local paperclip = inv:getFirstTypeRecurse("Base.Paperclip") -- move paperclip into main inventory
-                        originalPaperclipContainer = paperclip:getContainer()
-                        ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, paperclip,
-                            originalPaperclipContainer, inv))
-                        shouldReturnPaperclip = true
-                    end
-                end
-                ISTimedActionQueue.add(walkAction)
-                ISTimedActionQueue.add(lockpickAction)
-                if not toolInMainInv then -- return lockpicking tools to where it was
-                    ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, tool, inv, originalToolContainer))
-                end
-                -- check if paperclip still exists (might have broken)
-                print("shouldReturnPaperclip: " .. tostring(shouldReturnPaperclip))
-                print("originalPaperclipContainer: " .. tostring(originalPaperclipContainer))
-                print("inventory contains paperclip: " .. tostring(inv:containsType("Base.Paperclip")))
-                if shouldReturnPaperclip and originalPaperclipContainer and inv:containsType("Base.Paperclip") then
-                    print("try return paperclip")
-                    local paperclip = inv:getFirstType("Base.Paperclip") -- move paperclip into back into container
-                    ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, paperclip, inv,
-                        originalPaperclipContainer))
-                end
+                ISTimedActionQueue.add(walkAction) -- add walkAction separately and first
+                addLockpickingTaskToQueue(playerObj, target, targetType, tool)
             end)
             break
         end
@@ -158,7 +154,7 @@ end
 
 ---------- VehiclePart functions ----------
 
-local function tryAddLockpickOptions(playerObj)
+local function tryAddVehicleLockpickOption(playerObj)
     local vehicle = ISVehicleMenu.getVehicleToInteractWith(playerObj)
     if not vehicle then return end
 
@@ -171,13 +167,7 @@ local function tryAddLockpickOptions(playerObj)
 
     local partId = vehiclePart:getId()
 
-    print(tostring(partId))
-
-    if not (partId == "DoorFrontLeft"
-        or partId == "DoorFrontRight"
-        or partId == "TrunkDoor") then
-        return
-    end
+    if not (partId == "DoorFrontLeft" or partId == "DoorFrontRight") then return end
 
     local vehicleDoor = vehiclePart:getDoor()
 
@@ -188,16 +178,14 @@ local function tryAddLockpickOptions(playerObj)
     local tool = getValidLockpickTool(playerObj)
     if not tool then return end -- no valid tool found
 
-    local action = ALLockpickDoorAction:new(playerObj, vehiclePart, ALSharedUtils.ALPickableObjectType.VehicleDoor,
-        tool)
-
-    menu:addSlice(getText(getContextTextFromLockpickingToolObj(tool),
-        getTexture("media/textures/Vehicle_pick_lock.png"),
-        function()
-            ISTimedActionQueue.add(ISPathFindAction:pathToVehicleArea(playerObj, vehiclePart:getVehicle(),
-                vehiclePart:getArea()))
-            ISTimedActionQueue.add(action)
-        end)
+    menu:addSlice(
+        getText(getContextTextFromLockpickingToolObj(tool)),
+        getTexture("media/textures/Vehicle_pick_lock"),
+        addLockpickingTaskToQueue,
+        playerObj,
+        vehiclePart,
+        ALSharedUtils.ALPickableObjectType.VehicleDoor,
+        tool
     )
 end
 
@@ -209,7 +197,7 @@ function ISVehicleMenu.showRadialMenuOutside(player) -- overridden
     end
     
     -- Now safely add your lockpick options
-    tryAddLockpickOptions(player)
+    tryAddVehicleLockpickOption(player)
 end
 
 
@@ -225,6 +213,9 @@ local function ALOnServerCommand(module, command, args)
 
     if command == commands.setHaloNoteClient then
         player:setHaloNote(getText(args.text))
+    elseif command == commands.enterVehicle then
+        local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
+        ISTimedActionQueue.add(enterVehicleAction)
     end
 end
 

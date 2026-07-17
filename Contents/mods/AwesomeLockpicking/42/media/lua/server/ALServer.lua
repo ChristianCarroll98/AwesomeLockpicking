@@ -40,13 +40,12 @@ local function ALOnClientCommand(module, command, player, args)
                 return
             end
 
-            local part = vehicle:getPartById(args.vehiclePartId)
-            if not part then
+            door = vehicle:getPartById(args.vehiclePartId)
+            if not door then
                 print("[ERROR] AwesomeLockpicking - could not get vehicle part from part ID in ALOnClientCommand")
                 return
             end
 
-            door = part:getDoor()
         elseif targetType == targetTypes.WorldDoor or targetType == targetTypes.PlayerDoor then
             door = getDoorAt(args.x, args.y, args.z, targetType)
         end
