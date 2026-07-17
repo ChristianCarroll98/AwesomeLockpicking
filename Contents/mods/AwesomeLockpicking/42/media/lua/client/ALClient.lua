@@ -170,7 +170,8 @@ local function tryAddVehicleLockpickOption(playerObj)
 
     local vehicleDoor = vehiclePart:getDoor()
 
-    if not vehicleDoor or not vehicleDoor:isLocked() or vehicle:canUnlockDoor(vehiclePart, playerObj) then return end
+    if not vehicleDoor or vehicleDoor:isOpen() or not vehicleDoor:isLocked()
+        or vehicle:canUnlockDoor(vehiclePart, playerObj) then return end
 
     -- if we are here then we have a valid vehicle part that we could pick if we have the right tool
 
@@ -203,7 +204,7 @@ end
 local function ALOnServerCommand(module, command, args)
     local commands = ALSharedUtils.CommandList
     if module ~= commands.ALModule then return end
-    
+
     local player = getPlayer()
     if not player then
         print("[ERROR] AwesomeLockpicking - player nil in ALOnServerCommand")
@@ -213,8 +214,11 @@ local function ALOnServerCommand(module, command, args)
     if command == commands.setHaloNoteClient then
         player:setHaloNote(getText(args.text))
     elseif command == commands.enterVehicle then
-        local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
+        local enterVehicleAction = ISEnterVehicle:new(player, args.vehicle, args.seatIndex) -- sandbox option..
         ISTimedActionQueue.add(enterVehicleAction)
+    elseif command == commands.openVehicleDoor then
+        local openTrunkAction = ISOpenVehicleDoor:new(player, args.vehicle, args.vehiclePart)
+        ISTimedActionQueue.add(openTrunkAction)
     end
 end
 

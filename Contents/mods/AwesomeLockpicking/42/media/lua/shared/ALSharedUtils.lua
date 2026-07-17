@@ -123,24 +123,24 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
                 vehicleDoor:setLocked(false)
                 vehicle:transmitPartDoor(target) -- required??
 
-                local seatIndex = getSeatIndexFromPart(target)
-                print("[DEBUG] AwesomeLockpicking.applyLockpickAttempt - seatIndex: " .. tostring(seatIndex))
-
-                if seatIndex > -1 then -- enter vehicle
-                    if isServer() then
-                        sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
-                        {vehicle = vehicle, seatIndex = seatIndex})
-                    else
-                        local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
-                        ISTimedActionQueue.add(enterVehicleAction)
+                if target:getArea() ~= "TruckBed" then -- unlocking a door
+                    local seatIndex = getSeatIndexFromPart(target)    
+                    if seatIndex > -1 then -- enter vehicle
+                        if isServer() then
+                            sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
+                            {vehicle = vehicle, seatIndex = seatIndex})
+                        else
+                            local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
+                            ISTimedActionQueue.add(enterVehicleAction)
+                        end
                     end
-                else -- check for trunk
-                    print("vehicleDoor open: " .. tostring(vehicleDoor:isOpen()))
-                    vehicleDoor:setOpen(true)
-                    print("vehicleDoor open: " .. tostring(vehicleDoor:isOpen()))
-                    local trunkContainer = target:getItemContainer()
-                    if trunkContainer then
-                        trunkContainer:setOpen(true)
+                else -- unlocking a trunk
+                    if isServer() then
+                        sendServerCommand(playerObj, commands.ALModule, commands.openVehicleDoor,
+                        {vehicle = vehicle, vehiclePart = target})
+                    else
+                        local openTrunkAction = ISOpenVehicleDoor:new(playerObj, vehicle, target)
+                        ISTimedActionQueue.add(openTrunkAction)
                     end
                 end
             else
@@ -181,7 +181,8 @@ local CommandList = {
     ALModule = "ALModule",
     applyLockpickAttemptServer = "applyLockpickAttemptServer",
     setHaloNoteClient = "setHaloNoteClient",
-    enterVehicle = "enterVehicle"
+    enterVehicle = "enterVehicle",
+    openVehicleDoor = "openVehicleDoor"
 }
 
 local ALPickableObjectType = {
