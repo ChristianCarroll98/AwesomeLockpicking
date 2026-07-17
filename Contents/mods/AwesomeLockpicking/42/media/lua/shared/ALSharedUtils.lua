@@ -2,6 +2,20 @@ require 'Vehicles/ISUI/ISVehicleMenu'
 
 ALSharedUtils = ALSharedUtils or {}
 
+local settings = SandboxVars and SandboxVars.AwesomeLockpicking
+
+local function listAllVehiclePartInfo(vehicle)
+    local partCount = vehicle:getPartCount()
+    for i = 0, (partCount - 1) do
+        local part = vehicle:getPartByIndex(i)
+        if part then
+            local partId = part:getId()
+            -- Perform your checks here (e.g., is it a lock?)
+            print("Part ID: " .. tostring(partId) .. "; part area: " .. tostring(part:getArea()) .. "; isContainer: " .. tostring(part:getItemContainer() ~= nil))
+        end
+    end
+end
+
 local function getSeatIndexFromPart(part)
     if not part then return -1 end
     local vehicle = part:getVehicle()
@@ -41,10 +55,10 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
     local toolType = tool:getFullType()
     if toolType == "AwesomeLockpicking.ProfessionalLockpickingTools" then
         toolType = toolTypes.professional
-        toolBonus = 1.55
+        toolBonus = 1.5
     elseif toolType == "AwesomeLockpicking.ForgedLockpickingTools" then
         toolType = toolTypes.forged
-        toolBonus = 1.35
+        toolBonus = 1.3
     else
         toolType = toolTypes.screwdriver -- any screwdriver if not lockpicking tools
     end
@@ -53,24 +67,24 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
 
     local doorMultiplier = 1.0
     if targetType == targetTypes.VehicleDoor then
-        doorMultiplier = 0.6
+        doorMultiplier = 0.55
     else
         local sprite = target:getSprite()
         local props = sprite and sprite:getProperties()
         if props then
             if props:get("HighSecurity") == "true" then
-                doorMultiplier = 0.45
+                doorMultiplier = 0.5
             elseif props:get("MetalDoor") == "true" then
-                doorMultiplier = 0.75
+                doorMultiplier = 0.65
             elseif props:get("GlassDoor") == "true" then
-                doorMultiplier = 0.90
+                doorMultiplier = 0.8
             end
         end
     end
 
     local sandboxMod = 1.0
-    if SandboxVars and SandboxVars.AwesomeLockpicking then
-        sandboxMod = SandboxVars.AwesomeLockpicking.SuccessChanceModifier or 1.0
+    if settings then
+        sandboxMod = settings.SuccessChanceModifier or 1.0
     end
 
     local finalChance = baseChance * doorMultiplier * toolBonus * sandboxMod
@@ -123,24 +137,39 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
                 vehicleDoor:setLocked(false)
                 vehicle:transmitPartDoor(target) -- required??
 
+                print("target Part ID: " .. tostring(target:getId()) .. "; part area: "
+                    .. tostring(target:getArea()) .. "; isContainer: "
+                    .. tostring(target:getItemContainer() ~= nil))
+
+                print("All parts: ")
+                listAllVehiclePartInfo(vehicle)
+
                 if target:getArea() ~= "TruckBed" then -- unlocking a door
-                    local seatIndex = getSeatIndexFromPart(target)    
-                    if seatIndex > -1 then -- enter vehicle
-                        if isServer() then
-                            sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
-                            {vehicle = vehicle, seatIndex = seatIndex})
-                        else
-                            local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
-                            ISTimedActionQueue.add(enterVehicleAction)
+                    if settings.AutoEnterOnLockpickingVehicleDoor then
+                        local seatIndex = getSeatIndexFromPart(target)
+
+                        if seatIndex > -1 then -- enter vehicle
+
+                            if isServer() then
+                                sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
+                                    {vehicle = vehicle, seatIndex = seatIndex})
+
+                            else
+                                local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
+                                ISTimedActionQueue.add(enterVehicleAction)
+                            end
                         end
                     end
-                else -- unlocking a trunk
-                    if isServer() then
-                        sendServerCommand(playerObj, commands.ALModule, commands.openVehicleDoor,
-                        {vehicle = vehicle, vehiclePart = target})
-                    else
-                        local openTrunkAction = ISOpenVehicleDoor:new(playerObj, vehicle, target)
-                        ISTimedActionQueue.add(openTrunkAction)
+                else
+                    local truckBed = vehicle:getPartById("TruckBed")
+                    if truckBed and truckBed:getItemContainer() then
+                        if isServer() then
+                            sendServerCommand(playerObj, commands.ALModule, commands.openVehicleDoor,
+                                {vehicle = vehicle, vehiclePart = target})
+                        else
+                            local openTrunkAction = ISOpenVehicleDoor:new(playerObj, vehicle, target)
+                            ISTimedActionQueue.add(openTrunkAction)
+                        end
                     end
                 end
             else
@@ -163,13 +192,12 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
         sendServerCommand(playerObj, commands.ALModule, commands.setHaloNoteClient,
             {text = "IGUI_ingame_LockpickingTaskFailed"})
     else
-        playerObj:setHaloNote(getText("IGUI_ingame_LockpickingTaskFailed"))
-    end
+        local badColor = getCore():getBadHighlitedColor()
+        local r = math.floor(badColor:getR() * 255)
+        local g = math.floor(badColor:getG() * 255)
+        local b = math.floor(badColor:getB() * 255)
 
-    local settings = SandboxVars and SandboxVars.AwesomeLockpicking
-    if not settings then
-        print("[ERROR] AwesomeLockpicking - could not retrieve sandbox settings in applyLockpickAttempt")
-        return
+        playerObj:setHaloNote(getText("IGUI_ingame_LockpickingTaskFailed"), r, g, b, 150.0)
     end
 
     playerObj:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * xpGain, false, true, false)

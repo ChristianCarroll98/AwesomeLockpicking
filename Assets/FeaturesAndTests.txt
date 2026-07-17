@@ -1,0 +1,23 @@
+Automatically pull required tools from inventory packs
+ - return tools to pack on finished (sandbox setting)
+
+lockpicking action provides XP on fail or success, partial on fail
+
+Lockpick IsoDoors and IsoThumpable Doors
+ - Doors automatically open when lockpicking successful
+ - Sandbox option to prevent picking player doors
+
+Lockpick Vehicle Doors (front and passenger)
+ - Automatically enter lockpicked vehicle door (sandbox setting)
+ - Can only pick front doors
+
+Lockpick vehicle Trunks
+ - Automatically open trunk inventory UI
+ 
+Research Professional Tools at level 1 lockpicking or blacksmithing
+
+Forge Lockpicking Tools At level 2 blacksmithing and level 1 lockpicking at any forge with 2 small metal peices, tongs, hammer, and charcoal.
+
+Auto learn lockpicking tools at Blacksmithing level 4 and lockpicking level 3
+
+

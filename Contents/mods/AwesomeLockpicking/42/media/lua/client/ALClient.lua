@@ -5,6 +5,8 @@ require 'TimedActions/WalkToTimedAction'
 
 ---------- General Helper Functions ----------
 
+local settings = SandboxVars and SandboxVars.AwesomeLockpicking
+
 local function findFirstUnbroken(items)
     for i = 0, items:size() - 1 do
         local item = items:get(i)
@@ -93,8 +95,6 @@ end
 
 local function isValidIsoLockpickingTarget(target)
     if not target then return ALSharedUtils.ALPickableObjectType.None end
-
-    local settings = SandboxVars and SandboxVars.AwesomeLockpicking
 
     if instanceof(target, "IsoDoor") and target:isLocked() then
         local sprite = target:getSprite()
@@ -195,8 +195,9 @@ function ISVehicleMenu.showRadialMenuOutside(player) -- overridden
     if originalShowRadialMenuOutside then
         originalShowRadialMenuOutside(player)
     end
-    
-    -- Now safely add your lockpick options
+
+    if settings and not settings.AllowLockpickingVehicleDoors then return end
+    -- Now safely add lockpick options
     tryAddVehicleLockpickOption(player)
 end
 
@@ -212,7 +213,14 @@ local function ALOnServerCommand(module, command, args)
     end
 
     if command == commands.setHaloNoteClient then
-        player:setHaloNote(getText(args.text))
+
+        local badColor = getCore():getBadHighlitedColor()
+
+        local r = math.floor(badColor:getR() * 255)
+        local g = math.floor(badColor:getG() * 255)
+        local b = math.floor(badColor:getB() * 255)
+
+        player:setHaloNote(getText(args.text), r, g, b, 150.0)
     elseif command == commands.enterVehicle then
         local enterVehicleAction = ISEnterVehicle:new(player, args.vehicle, args.seatIndex) -- sandbox option..
         ISTimedActionQueue.add(enterVehicleAction)
