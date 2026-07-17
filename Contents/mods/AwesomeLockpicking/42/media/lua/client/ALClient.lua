@@ -110,7 +110,6 @@ local function isValidIsoLockpickingTarget(target)
 
     if instanceof(target, "IsoThumpable") and target:isDoor() and target:isLocked() then
         if settings and not settings.AllowLockpickingPlayerDoors then
-            print("player doors not allowed: " .. tostring(settings.AllowLockpickingPlayerDoors))
             return ALSharedUtils.ALPickableObjectType.None
         end
 
@@ -167,7 +166,7 @@ local function tryAddVehicleLockpickOption(playerObj)
 
     local partId = vehiclePart:getId()
 
-    if not (partId == "DoorFrontLeft" or partId == "DoorFrontRight") then return end
+    if not ALSharedUtils.ALValidVehiclePartIds[partId] then return end
 
     local vehicleDoor = vehiclePart:getDoor()
 
@@ -180,7 +179,7 @@ local function tryAddVehicleLockpickOption(playerObj)
 
     menu:addSlice(
         getText(getContextTextFromLockpickingToolObj(tool)),
-        getTexture("media/textures/Vehicle_pick_lock"),
+        getTexture("textures/Vehicle_pick_lock.png"),
         addLockpickingTaskToQueue,
         playerObj,
         vehiclePart,

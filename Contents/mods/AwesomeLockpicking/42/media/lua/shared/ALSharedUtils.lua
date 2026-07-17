@@ -2,6 +2,22 @@ require 'Vehicles/ISUI/ISVehicleMenu'
 
 ALSharedUtils = ALSharedUtils or {}
 
+local function getSeatIndexFromPart(part)
+    if not part then return -1 end
+    local vehicle = part:getVehicle()
+    if not vehicle then return -1 end
+
+    for i = 0, vehicle:getMaxPassengers() - 1 do
+        -- Only check the doors mapped to this seat index
+        if vehicle:getPassengerDoor(i) == part or vehicle:getPassengerDoor2(i) == part then
+            return i
+        end
+    end
+
+    return -1 -- Not a door assigned to a seat
+end
+
+
 local function applyLockpickAttempt(playerObj, tool, target, targetType)
     local targetTypes = ALSharedUtils.ALPickableObjectType
     if not playerObj or not target or not tool or not targetType or targetType == targetTypes.None then
@@ -95,24 +111,22 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
             local vehicle = target:getVehicle()
             if vehicle then
                 if not target then
-                    print('[ERROR] AwesomeLockpicking - no such vehicle part '..tostring(target))
+                    print('[ERROR] AwesomeLockpicking.applyLockpickAttempt - no such vehicle part '..tostring(target))
                     return
                 end
                 local vehicleDoor = target:getDoor()
                 if not vehicleDoor then
-                    print('[ERROR] AwesomeLockpicking - part ' .. target .. ' has no door')
+                    print('[ERROR] AwesomeLockpicking.applyLockpickAttempt - part ' .. target .. ' has no door')
                     return
                 end
+
                 vehicleDoor:setLocked(false)
                 vehicle:transmitPartDoor(target) -- required??
 
-                local areaId = target:getArea() -- Grabs layout ID (e.g., "FrontLeft")
-                print("[DEBUG] getArea: " .. tostring(areaId))
-                local seatIndex = vehicle:getScript():getPassengerIndex(areaId) -- Returns 0, 1, 2... or -1
-                print("[DEBUG] seatIndex: " .. tostring(seatIndex))
-                if(seatIndex == -1) then
-                    print("[DEBUG] seatIndex was -1!")
-                else -- enter vehicle
+                local seatIndex = getSeatIndexFromPart(target)
+                print("[DEBUG] AwesomeLockpicking.applyLockpickAttempt - seatIndex: " .. tostring(seatIndex))
+
+                if seatIndex > -1 then -- enter vehicle
                     if isServer() then
                         sendServerCommand(playerObj, commands.ALModule, commands.enterVehicle,
                         {vehicle = vehicle, seatIndex = seatIndex})
@@ -120,9 +134,17 @@ local function applyLockpickAttempt(playerObj, tool, target, targetType)
                         local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicle, seatIndex) -- sandbox option..
                         ISTimedActionQueue.add(enterVehicleAction)
                     end
+                else -- check for trunk
+                    print("vehicleDoor open: " .. tostring(vehicleDoor:isOpen()))
+                    vehicleDoor:setOpen(true)
+                    print("vehicleDoor open: " .. tostring(vehicleDoor:isOpen()))
+                    local trunkContainer = target:getItemContainer()
+                    if trunkContainer then
+                        trunkContainer:setOpen(true)
+                    end
                 end
             else
-                print('no such vehicle id='..tostring(vehicle))
+                print('[ERROR] AwesomeLockpicking.applyLockpickAttempt - no such vehicle id='..tostring(vehicle))
                 return
             end
         else
@@ -169,7 +191,16 @@ local ALPickableObjectType = {
     None = "None"
 }
 
+local ALValidVehiclePartIds = {
+    DoorFrontLeft = "DoorFrontLeft", -- all cars
+    DoorFrontRight = "DoorFrontRight", -- all cars
+    DoorRear = "DoorRear", -- large van back doors
+    TrunkDoor = "TrunkDoor", -- most trunks
+    TrunkDoorOpened = "TrunkDoorOpened" -- trailers
+}
+
 ---------- Exports ----------
 ALSharedUtils.applyLockpickAttempt = applyLockpickAttempt
 ALSharedUtils.CommandList = CommandList
 ALSharedUtils.ALPickableObjectType = ALPickableObjectType
+ALSharedUtils.ALValidVehiclePartIds = ALValidVehiclePartIds
