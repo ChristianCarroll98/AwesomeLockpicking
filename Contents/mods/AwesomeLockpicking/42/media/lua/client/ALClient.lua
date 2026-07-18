@@ -1,5 +1,6 @@
 require 'TimedActions/ALLockpickDoorAction'
 require 'TimedActions/WalkToTimedAction'
+require 'ALNetworkRouter'
 -- require 'Vehicles/ISUI/ISVehicleMenu' - already comes from ALSharedUtils
 -- require 'ALSharedUtils' - already comes from ALLockpickDoorAction
 
@@ -94,14 +95,14 @@ end
 ---------- IsoObject Lockpicking Functions ----------
 
 local function isValidIsoLockpickingTarget(target)
-    if not target then return ALSharedUtils.ALPickableObjectType.None end
+    if not target then return ALSharedUtils.ALPickableObjectType.Invalid end
 
     if instanceof(target, "IsoDoor") and target:isLocked() then
         local sprite = target:getSprite()
         local props = sprite and sprite:getProperties()
         if props and props:get("HighSecurity") == "true" then
             if settings and not settings.AllowLockpickingHighSecurityDoors then
-                return ALSharedUtils.ALPickableObjectType.None
+                return ALSharedUtils.ALPickableObjectType.Invalid
             end
         end
 
@@ -110,13 +111,13 @@ local function isValidIsoLockpickingTarget(target)
 
     if instanceof(target, "IsoThumpable") and target:isDoor() and target:isLocked() then
         if settings and not settings.AllowLockpickingPlayerDoors then
-            return ALSharedUtils.ALPickableObjectType.None
+            return ALSharedUtils.ALPickableObjectType.Invalid
         end
 
         return ALSharedUtils.ALPickableObjectType.PlayerDoor
     end
 
-    return ALSharedUtils.ALPickableObjectType.None
+    return ALSharedUtils.ALPickableObjectType.Invalid
 end
 
 local function addLockpickingContextMenuOption(player, context, worldobjects, ...)
@@ -166,7 +167,15 @@ local function tryAddVehicleLockpickOption(playerObj)
 
     local partId = vehiclePart:getId()
 
-    if not ALSharedUtils.ALValidVehiclePartIds[partId] then return end
+    local ALValidVehiclePartIds = {
+        DoorFrontLeft = "DoorFrontLeft", -- all cars
+        DoorFrontRight = "DoorFrontRight", -- all cars
+        DoorRear = "DoorRear", -- large van back doors
+        TrunkDoor = "TrunkDoor", -- most trunks
+        TrunkDoorOpened = "TrunkDoorOpened" -- trailers
+    }
+
+    if not ALValidVehiclePartIds[partId] then return end
 
     local vehicleDoor = vehiclePart:getDoor()
 
@@ -202,8 +211,12 @@ function ISVehicleMenu.showRadialMenuOutside(player) -- overridden
 end
 
 
-local function ALOnServerCommand(module, command, args)
-    local commands = ALSharedUtils.CommandList
+local function ALOnServerCommand(module, serverCommand, args)
+    if module ~= ALNetworkRouter.MODULE_NAME then return end
+
+    ALNetworkRouter.handleServerCommand(serverCommand, args)
+
+    --[[ local commands = ALSharedUtils.CommandList
     if module ~= commands.ALModule then return end
 
     local player = getPlayer()
@@ -221,13 +234,13 @@ local function ALOnServerCommand(module, command, args)
         local b = math.floor(badColor:getB() * 255)
 
         player:setHaloNote(getText(args.text), r, g, b, 150.0)
-    elseif command == commands.enterVehicle then
+    elseif command == commands.enterVehicleClient then
         local enterVehicleAction = ISEnterVehicle:new(player, args.vehicle, args.seatIndex) -- sandbox option..
         ISTimedActionQueue.add(enterVehicleAction)
-    elseif command == commands.openVehicleDoor then
+    elseif command == commands.openVehicleDoorClient then
         local openTrunkAction = ISOpenVehicleDoor:new(player, args.vehicle, args.vehiclePart)
         ISTimedActionQueue.add(openTrunkAction)
-    end
+    end ]]
 end
 
 Events.OnServerCommand.Add(ALOnServerCommand)

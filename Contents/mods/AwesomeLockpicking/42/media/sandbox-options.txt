@@ -1,9 +1,9 @@
 VERSION = 1,
 
-option AwesomeLockpicking.SuccessChanceModifier
+option AwesomeLockpicking.SuccessChanceMultiplier
 {
     type = double, min = 0.1, max = 10.0, default = 1.0,
-    page = AwesomeLockpicking, translation = SuccessChanceModifier,
+    page = AwesomeLockpicking, translation = SuccessChanceMultiplier,
 }
 option AwesomeLockpicking.XPMultiplier
 {
