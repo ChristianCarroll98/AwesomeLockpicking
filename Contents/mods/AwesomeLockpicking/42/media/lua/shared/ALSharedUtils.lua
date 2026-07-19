@@ -1,14 +1,9 @@
 require 'Vehicles/ISUI/ISVehicleMenu'
-require 'ALNetworkRouter'
-
 
 ALSharedUtils = ALSharedUtils or {}
 
 
----------- enums and global const vars ----------
-
----@const
-local settings = SandboxVars and SandboxVars.AwesomeLockpicking
+---------- exported enums ----------
 
 ---@const
 ---@enum toolTypes

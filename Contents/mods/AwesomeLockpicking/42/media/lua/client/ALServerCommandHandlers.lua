@@ -6,6 +6,7 @@ local settings = SandboxVars and SandboxVars.AwesomeLockpicking
 
 
 --- Sets halo note with given text in red "bad" color for 150.0 duration. Expected params: integer playerId, string text
+--- (takes text in case I add other warnings later like "too dark...")
 ---@param args ALargsType
 local function setHaloNoteWarningHandler(args)
     local playerId = args.playerId --[[@as integer]]

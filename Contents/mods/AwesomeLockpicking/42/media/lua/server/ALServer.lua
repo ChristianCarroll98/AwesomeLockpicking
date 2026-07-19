@@ -3,7 +3,7 @@ require 'ALNetworkRouter'
 --- Gives the player a Professional Lockpicking Tools item on start if they selected the Master Locksmith profession
 ---@param playerObj IsoPlayer
 local function giveMasterLocksmithStartingTools(playerObj)
-    if ALNetworkRouter.isPureClientContext() then return end -- only for SP and server side
+    if ALNetworkRouter.isPureClientContext() then return end -- only for SP and server side ALTODO might not be needed? check in SP.
 
     if not playerObj then
         print("[ERROR] AwesomeLockpicking.ALServer.giveMasterLocksmithStartingTools - playerObj nil")
