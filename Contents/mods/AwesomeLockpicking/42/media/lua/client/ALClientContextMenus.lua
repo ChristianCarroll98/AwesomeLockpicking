@@ -120,31 +120,31 @@ end
 ---@param target IsoObject
 ---@return targetTypes
 local function getIsoLockpickingTargetType(target)
-    if not target then return ALSharedUtils.LockpickableObjectTypes.Invalid end
+    if not target then return ALSharedUtils.lockpickableObjectTypes.Invalid end
 
     if instanceof(target, "IsoDoor") and target--[[@as IsoDoor]]:isLocked() then
         local sprite = target:getSprite()
         local props = sprite and sprite:getProperties()
         if props and props:get("HighSecurity") == "true" then
             if settings and not settings.AllowLockpickingHighSecurityDoors then
-                return ALSharedUtils.LockpickableObjectTypes.Invalid
+                return ALSharedUtils.lockpickableObjectTypes.Invalid
             end
         end
 
-        return ALSharedUtils.LockpickableObjectTypes.WorldDoor
+        return ALSharedUtils.lockpickableObjectTypes.WorldDoor
     end
 
     if instanceof(target, "IsoThumpable") and target--[[@as IsoThumpable]].isDoor
         and target--[[@as IsoThumpable]]:isDoor() and target--[[@as IsoThumpable]]:isLocked() then
 
         if settings and not settings.AllowLockpickingPlayerDoors then
-            return ALSharedUtils.LockpickableObjectTypes.Invalid
+            return ALSharedUtils.lockpickableObjectTypes.Invalid
         end
 
-        return ALSharedUtils.LockpickableObjectTypes.PlayerDoor
+        return ALSharedUtils.lockpickableObjectTypes.PlayerDoor
     end
 
-    return ALSharedUtils.LockpickableObjectTypes.Invalid
+    return ALSharedUtils.lockpickableObjectTypes.Invalid
 end
 
 
@@ -167,7 +167,7 @@ local function addLockpickingContextMenuOption(player, context, worldobjects, te
     local tool = getValidLockpickTool(playerObj)
     if not tool then return end -- no valid tool found
 
-    local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local targetTypes = ALSharedUtils.lockpickableObjectTypes
 
     for _, target in ipairs(worldobjects) do
         local targetType = getIsoLockpickingTargetType(target)
@@ -233,7 +233,7 @@ local function tryAddVehicleLockpickOption(playerObj)
         addLockpickingTaskToQueue,
         playerObj,
         vehiclePart,
-        ALSharedUtils.LockpickableObjectTypes.VehicleDoor,
+        ALSharedUtils.lockpickableObjectTypes.VehicleDoor,
         tool
     )
 end

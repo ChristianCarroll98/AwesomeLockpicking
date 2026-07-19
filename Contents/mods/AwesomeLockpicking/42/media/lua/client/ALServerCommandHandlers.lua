@@ -8,11 +8,24 @@ local settings = SandboxVars and SandboxVars.AwesomeLockpicking
 --- Sets halo note with given text in red "bad" color for 150.0 duration. Expected params: integer playerId, string text
 ---@param args ALargsType
 local function setHaloNoteWarningHandler(args)
-
     local playerId = args.playerId --[[@as integer]]
+    if not playerId then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
+        return
+    end
     local text = args.text --[[@as string]]
+    if not text or text == "" then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.text nil or empty")
+        return
+    end
 
-    local playerObj = getPlayerByOnlineID(playerId)
+    ---@type IsoPlayer
+    local playerObj = nil
+    if ALNetworkRouter:isSinglePlayerContext() then
+        playerObj = getSpecificPlayer(playerId)
+    else
+        playerObj = getPlayerByOnlineID(playerId)
+    end
     if not playerObj then
         print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - could not find player "
             .. "with online Id: " .. tostring(playerId))

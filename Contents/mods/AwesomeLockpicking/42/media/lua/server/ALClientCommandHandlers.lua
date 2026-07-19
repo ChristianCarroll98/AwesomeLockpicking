@@ -45,6 +45,14 @@ local XP_GAIN = 10.0
 ---@param target IsoDoor|IsoThumpable|VehiclePart|nil
 ---@return boolean
 local function isLockpickSuccess(playerObj, tool, target)
+    if not playerObj then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - playerObj nil")
+        return false
+    end
+    if not tool then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - tool nil")
+        return false
+    end
     if not target then
         print("[ERROR] AwesomeLockpicking.ALSharedUtils.isLockpickSuccess - target invalid")
         return false
@@ -107,6 +115,15 @@ end
 ---@param tool InventoryItem
 ---@param success boolean
 local function tryReduceToolDurability(playerObj, tool, success)
+    if not playerObj then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.tryReduceToolDurability - playerObj nil")
+        return false
+    end
+    if not tool then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.tryReduceToolDurability - tool nil")
+        return false
+    end
+
     local inv = playerObj:getInventory()
     if not inv then
         print("[ERROR] AwesomeLockpicking.ALSharedUtils.tryReduceToolDurability - could not get player inventory")
@@ -150,7 +167,10 @@ end
 ---@param vehiclePart VehiclePart
 ---@return integer
 local function getSeatIndexFromPart(vehiclePart)
-    if not vehiclePart then return -1 end
+    if not vehiclePart then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.getSeatIndexFromPart - vehiclePart nil")
+        return -1
+    end
     local vehicle = vehiclePart:getVehicle()
     if not vehicle then return -1 end
 
@@ -170,21 +190,29 @@ end
 ---@param vehicle BaseVehicle
 ---@param vehiclePartId string
 local function handleVehiclePart(playerObj, vehicle, vehiclePartId)
+    if not playerObj then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - playerObj nil")
+        return
+    end
     if not vehicle then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - vehicle nil")
+        return
+    end
+    if not vehiclePartId or vehiclePartId == "" then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - vehiclePartId nil or empty")
         return
     end
 
     local vehiclePart = vehicle:getPartById(vehiclePartId)
     if not vehiclePart then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - could not get vehicle part from "
-            .. "part ID in ALOnClientCommand")
+            .. "part ID: " .. tostring(vehiclePartId))
         return
     end
 
     local vehicleDoor = vehiclePart.getDoor and vehiclePart:getDoor()
     if not vehicleDoor then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - part " .. vehiclePartId
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - part " .. tostring(vehiclePartId)
             .. " has no door")
         return
     end
@@ -230,20 +258,41 @@ end
 --- vehiclePartId, or if WorldDoor or PlayerDoor: table<string, number>: {x, y, z} squarePos
 ---@param args ALargsType
 local function applyLockpickAttempt(args)
-    local playerObj = getPlayerByOnlineID(args.playerId --[[@as integer]])
+    local playerId = args.playerId --[[@as integer]]
+    if not playerId then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.playerId nil")
+        return
+    end
+    local toolId = args.toolId --[[@as integer]]
+    if not toolId then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.toolId nil")
+        return
+    end
+    local targetType = args.targetType --[[@as targetTypes]]
+    if not targetType then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.targetType nil")
+        return
+    end
+    ---@type IsoPlayer
+    local playerObj = nil
+    if ALNetworkRouter:isSinglePlayerContext() then
+        playerObj = getSpecificPlayer(playerId)
+    else
+        playerObj = getPlayerByOnlineID(playerId)
+    end
     if not playerObj then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - Could not retrieve player "
-        .. "from player online ID")
+        .. "from player online ID: " .. tostring(playerId))
         return
     end
 
-    local tool = playerObj:getInventory():getItemWithID(args.toolId --[[@as integer]])
+    local tool = playerObj:getInventory():getItemWithID(toolId)
     if not tool then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get tool from Id")
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get tool from "
+            .. "toolId: " .. tostring(toolId))
         return
     end
 
-    local targetType = args.targetType
     local targetTypes = ALSharedUtils.LockpickableObjectTypes
     ---@type IsoDoor|IsoThumpable|VehiclePart
     local targetObj = nil
@@ -252,15 +301,29 @@ local function applyLockpickAttempt(args)
 
     -- get target object based on type
     if targetType == targetTypes.VehicleDoor then
-        ---@diagnostic disable-next-line: undefined-global
-        vehicleObj = VehicleManager.instance:getVehicleByID(args.vehicleId --[[@as integer]])
-        if not vehicleObj then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
-            .. "from Id")
+        local vehicleId = args.vehicleId --[[@as integer]]
+        if not vehicleId then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehicleId nil")
             return
         end
 
-        targetObj = vehicleObj:getPartById(args.vehiclePartId --[[@as string]]) --[[@as VehiclePart]]
+        ---@type BaseVehicle
+        ---@diagnostic disable-next-line: undefined-global
+        vehicleObj = VehicleManager.instance:getVehicleByID(vehicleId)
+        if not vehicleObj then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
+            .. "from vehicleId: " .. tostring(vehicleId))
+            return
+        end
+
+        local vehiclePartId = args.vehiclePartId --[[@as string]]
+        if not vehiclePartId or vehiclePartId == "" then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehiclePartId "
+                .. "nil or empty")
+            return
+        end
+
+        targetObj = vehicleObj:getPartById(vehiclePartId)
         if not targetObj then
             print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
             .. "part from Id")
@@ -270,6 +333,13 @@ local function applyLockpickAttempt(args)
         or targetType == targetTypes.WorldDoor then
 
         local pos = args.squarePos --[[@as table<string, number>]]
+        if not pos then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - pos table nil")
+            return
+        elseif not pos.x or not pos.y or not pos.z then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - pos.x/y/z nil")
+            return
+        end
 
         local square = getCell():getGridSquare(pos.x, pos.y, pos.z)
         if not square then
@@ -313,7 +383,7 @@ local function applyLockpickAttempt(args)
             playerObj,
             ALNetworkRouter.serverCommands.setHaloNoteWarning,
             {
-                playerId = playerObj:getOnlineID(),
+                playerId = playerId,
                 text = getText("IGUI_ingame_LockpickingTaskFailed")
             }
         )

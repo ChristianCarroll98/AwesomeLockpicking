@@ -39,8 +39,15 @@ function ALLockpickDoorAction:perform()
 
     local targetType = self.targetType
     local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local playerId = -1
+    if ALNetworkRouter:isSinglePlayerContext() then
+        playerId = self.character:getPlayerNum()
+    else
+        playerId = self.character:getOnlineID()
+    end
 
     local args = {
+        playerId = playerId,
         toolId = self.tool:getID(),
         targetType = targetType
     }
