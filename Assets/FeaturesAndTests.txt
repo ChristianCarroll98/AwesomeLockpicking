@@ -1,3 +1,11 @@
+topic: project zomboid build 42.19 modding lua/zedscripts, Lockpicking mod AwesomeLockpicking on steam workshop; question: 
+
+TODO:
+Add handling for double doors
+fix opening trailer beds - wont automatically open after unlocking due to the way that the game handles them differently from other car trunks.
+
+
+
 Automatically pull required tools from inventory packs
  - return tools to pack on finished (sandbox setting)
 
