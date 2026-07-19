@@ -391,7 +391,7 @@ local function applyLockpickAttempt(args)
             ALNetworkRouter.serverCommands.setHaloNoteWarning,
             {
                 playerId = playerId,
-                text = getText("IGUI_ingame_LockpickingTaskFailed")
+                textTranslationKey = "IGUI_ingame_LockpickingTaskFailed"
             }
         )
     end
@@ -400,7 +400,7 @@ local function applyLockpickAttempt(args)
     local successXPMultiplier = success and 1.0 or 2.0
 
     playerObj:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * XP_GAIN * successXPMultiplier, false, true,
-        false) -- ALTODO: is this method set up correctly?
+        ALNetworkRouter.isPureServerContext())
 end
 ALNetworkRouter.registerClientCommandHandler(ALNetworkRouter.clientCommands.applyLockpickAttempt,
     applyLockpickAttempt)

@@ -5,8 +5,9 @@ require 'ALSharedUtils'
 local settings = SandboxVars and SandboxVars.AwesomeLockpicking
 
 
---- Sets halo note with given text in red "bad" color for 150.0 duration. Expected params: integer playerId, string text
---- (takes text in case I add other warnings later like "too dark...")
+--- Sets halo note with given text in red "bad" color for 150.0 duration. Expected params: integer playerId, string 
+--- textTranslationKey (takes text key in case I add other warnings later like "too dark...") ALTODO: optionally take
+--- color as argument?
 ---@param args ALargsType
 local function setHaloNoteWarningHandler(args)
     local playerId = args.playerId --[[@as integer]]
@@ -14,8 +15,8 @@ local function setHaloNoteWarningHandler(args)
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
         return
     end
-    local text = args.text --[[@as string]]
-    if not text or text == "" then
+    local textTranslationKey = args.textTranslationKey --[[@as string]]
+    if not textTranslationKey or textTranslationKey == "" then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.text nil or empty")
         return
     end
@@ -31,8 +32,15 @@ local function setHaloNoteWarningHandler(args)
         print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - could not find player "
             .. "with online Id: " .. tostring(playerId))
         return
-    elseif not text or text == "" then
+    elseif not textTranslationKey or textTranslationKey == "" then
         print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - text nil or empty")
+        return
+    end
+
+    local text = getText(textTranslationKey)
+    if not text or text == textTranslationKey then
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - Could not get text "
+            .. "from translation key: " .. tostring(textTranslationKey))
         return
     end
 
@@ -42,7 +50,7 @@ local function setHaloNoteWarningHandler(args)
     local g = math.floor(badColor:getG() * 255)
     local b = math.floor(badColor:getB() * 255)
 
-    playerObj:setHaloNote(text, r, g, b, 150.0)
+    playerObj:setHaloNote(textTranslationKey, r, g, b, 150.0)
 end
 ALNetworkRouter.registerServerCommandHandler(ALNetworkRouter.serverCommands.setHaloNoteWarning,
     setHaloNoteWarningHandler)
