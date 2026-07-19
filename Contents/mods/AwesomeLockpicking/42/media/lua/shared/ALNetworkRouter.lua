@@ -14,7 +14,7 @@ ALNetworkRouter.clientCommands = {
 ---@const
 ---@enum serverCommands
 ALNetworkRouter.serverCommands = {
-    setHaloNoteWarning = "setHaloNoteWarning", -- sets halo note with given text in red "bad" color for 150.0 duration
+    setHaloNoteWarning = "setHaloNoteWarning",
     enterVehicle = "enterVehicle",
     openVehicleDoor = "openVehicleDoor"
 }
@@ -27,30 +27,31 @@ ALNetworkRouter.MODULE_NAME = "ALModule"
 ---@field [string] string | number | integer | boolean | nil | ALargsType
 
 
----------- local helper functions ----------
-
 --- Returns true if current context is singleplayer, otherwise false
 ---@return boolean
-local function isSinglePlayer()
+function ALNetworkRouter.isSinglePlayerContext()
     return not isClient() and not isServer()
 end
 
+
 --- Returns true if current context is pure client connected to multiplayer host, otherwise false
 ---@return boolean
-local function isPureClient()
+function ALNetworkRouter.isPureClientContext()
     return isClient() and not isServer()
 end
 
+
 --- Returns true if current context live multiplayer server host, otherwise false
 ---@return boolean
-local function isPureServer()
+function ALNetworkRouter.isPureServerContext()
     return not isClient() and isServer()
 end
 
---- server -> client - process server commands on the client
+
+--- server -> client - process server commands on the client. Do not call directly.
 ---@param serverCommand serverCommands
 ---@param args ALargsType
-local function handleServerCommand(serverCommand, args)
+function ALNetworkRouter.handleServerCommand(serverCommand, args)
     args = args or {}
     local serverCommandHandler = ALNetworkRouter.serverCommandHandlers[serverCommand]
     if serverCommandHandler then
@@ -61,10 +62,11 @@ local function handleServerCommand(serverCommand, args)
     end
 end
 
---- client -> server - process clent commands on the server
+
+--- client -> server - process clent commands on the server. Do not call directly.
 ---@param clientCommand clientCommands
 ---@param args ALargsType
-local function handleClientCommand(clientCommand, args)
+function ALNetworkRouter.handleClientCommand(clientCommand, args)
     args = args or {}
     local clientCommandHandler = ALNetworkRouter.clientCommandHandlers[clientCommand]
     if clientCommandHandler then
@@ -75,8 +77,6 @@ local function handleClientCommand(clientCommand, args)
     end
 end
 
-
----------- exported network routing functions ----------
 
 --- Assign a function to the indicated server command to be executed on the client
 ---@param serverCommand serverCommands
@@ -90,6 +90,7 @@ function ALNetworkRouter.registerServerCommandHandler(serverCommand, func)
     end
 end
 
+
 --- Assign a function to the indicated client command to be executed on the server
 ---@param clientCommand clientCommands
 ---@param func fun(...): any
@@ -102,15 +103,16 @@ function ALNetworkRouter.registerClientCommandHandler(clientCommand, func)
     end
 end
 
+
 ---Unified client command sender, call this from anywhere to properly route a function that should execute from server
 ---@param clientCommand clientCommands
 ---@param args ALargsType
 function ALNetworkRouter.sendToServer(clientCommand, args)
-    if isPureClient() then
+    if ALNetworkRouter.isPureClientContext() then
         sendClientCommand(ALNetworkRouter.MODULE_NAME, clientCommand, args)
 
-    elseif isSinglePlayer() or isPureServer() then
-        handleClientCommand(clientCommand, args)
+    elseif ALNetworkRouter.isSinglePlayerContext() or ALNetworkRouter.isPureServerContext() then
+        ALNetworkRouter.handleClientCommand(clientCommand, args)
 
     else
         print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToServer - Unknown environment context, "
@@ -118,12 +120,13 @@ function ALNetworkRouter.sendToServer(clientCommand, args)
     end
 end
 
+
 ---Unified server command sender, call this from anywhere to properly route a function that should execute from client
 ---@param playerObj IsoPlayer
 ---@param serverCommand serverCommands
 ---@param args ALargsType
 function ALNetworkRouter.sendToClient(playerObj, serverCommand, args)
-    if isPureServer() then
+    if ALNetworkRouter.isPureServerContext() then
         if not playerObj then
             print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToClient - playerObj param nil in pure server "
                 .. "context, sendToClient aborted")
@@ -131,8 +134,8 @@ function ALNetworkRouter.sendToClient(playerObj, serverCommand, args)
         end
         sendServerCommand(playerObj, ALNetworkRouter.MODULE_NAME, serverCommand, args)
 
-    elseif isSinglePlayer() or isPureClient() then
-        handleServerCommand(serverCommand, args)
+    elseif ALNetworkRouter.isSinglePlayerContext() or ALNetworkRouter.isPureClientContext() then
+        ALNetworkRouter.handleServerCommand(serverCommand, args)
 
     else
         print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToClient - Unknown environment context, "
