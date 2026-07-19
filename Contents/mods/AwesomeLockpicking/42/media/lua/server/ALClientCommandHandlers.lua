@@ -106,6 +106,10 @@ local function isLockpickSuccess(playerObj, tool, target)
 
     finalChance = math.max(MIN_CHANCE, finalChance)
 
+    --[[ print("[DEBUG] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - base*door*tool*sandbox = "
+        .. "successChance: " .. tostring(baseChance) .. "*" .. tostring(doorMultiplier) .. "*" .. tostring(toolBonus)
+        .. "*" .. tostring(sandboxMod) .. " = " .. tostring(finalChance)) ]]
+
     return ZombRand(100) < finalChance
 end
 
@@ -307,9 +311,7 @@ local function applyLockpickAttempt(args)
             return
         end
 
-        ---@type BaseVehicle
-        ---@diagnostic disable-next-line: undefined-global
-        vehicleObj = VehicleManager.instance:getVehicleByID(vehicleId)
+        vehicleObj = getVehicleById(vehicleId)
         if not vehicleObj then
             print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
             .. "from vehicleId: " .. tostring(vehicleId))
@@ -317,6 +319,11 @@ local function applyLockpickAttempt(args)
         end
 
         local vehiclePartId = args.vehiclePartId --[[@as string]]
+        if not vehiclePartId then
+            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehiclePartId nil")
+            return
+        end
+
         if not vehiclePartId or vehiclePartId == "" then
             print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehiclePartId "
                 .. "nil or empty")

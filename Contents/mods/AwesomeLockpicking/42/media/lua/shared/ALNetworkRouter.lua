@@ -82,12 +82,11 @@ end
 ---@param serverCommand serverCommands
 ---@param func fun(...): any
 function ALNetworkRouter.registerServerCommandHandler(serverCommand, func)
-    if not ALNetworkRouter.serverCommandHandlers[serverCommand] then
-        ALNetworkRouter.serverCommandHandlers[serverCommand] = func
-    else
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerServerCommandHandler - attempted to re-register "
+    if ALNetworkRouter.serverCommandHandlers[serverCommand] then
+        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerServerCommandHandler - re-registering "
             .. "server command: " .. tostring(serverCommand))
     end
+    ALNetworkRouter.serverCommandHandlers[serverCommand] = func
 end
 
 
@@ -95,12 +94,11 @@ end
 ---@param clientCommand clientCommands
 ---@param func fun(...): any
 function ALNetworkRouter.registerClientCommandHandler(clientCommand, func)
-    if not ALNetworkRouter.clientCommandHandlers[clientCommand] then
-        ALNetworkRouter.clientCommandHandlers[clientCommand] = func
-    else
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerClientCommandHandler - attempted to re-register "
+    if ALNetworkRouter.clientCommandHandlers[clientCommand] then
+        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerClientCommandHandler - re-registering "
             .. "client command: " .. tostring(clientCommand))
     end
+    ALNetworkRouter.clientCommandHandlers[clientCommand] = func
 end
 
 

@@ -54,22 +54,40 @@ local function addEnterVehicleActionToQueue(args)
         return
     end
 
-    local playerObj = getPlayerByOnlineID(args.playerId --[[@as integer]])
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addEnterVehicleActionToQueue handler - could not "
-            .. "find player with online Id: " .. tostring(args.playerId))
+    local playerId = args.playerId --[[@as integer]]
+    if not playerId then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
         return
     end
 
-    ---@diagnostic disable: undefined-global
-    local vehicleObj = VehicleManager.instance:getVehicleByID(args.vehicleId --[[@as integer]])
+    ---@type IsoPlayer
+    local playerObj = nil
+    if ALNetworkRouter:isSinglePlayerContext() then
+        playerObj = getSpecificPlayer(playerId)
+    else
+        playerObj = getPlayerByOnlineID(playerId)
+    end
+
+    local vehicleId = args.vehicleId --[[@as integer]]
+    if not vehicleId then
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addEnterVehicleActionToQueue - args.vehicleId nil")
+        return
+    end
+
+    local vehicleObj = getVehicleById(vehicleId)
     if not vehicleObj then
         print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addEnterVehicleActionToQueue - could not get vehicle "
-            .. "from vehicleId: " .. tostring(args.vehicleId))
+        .. "from vehicleId: " .. tostring(vehicleId))
         return
     end
 
-    local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicleObj, args.seatIndex --[[@as integer]])
+    local seatIndex = args.seatIndex --[[@as integer]]
+    if not seatIndex then
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addEnterVehicleActionToQueue - args.seatIndex nil")
+        return
+    end
+
+    local enterVehicleAction = ISEnterVehicle:new(playerObj, vehicleObj, seatIndex)
     ISTimedActionQueue.add(enterVehicleAction)
 end
 ALNetworkRouter.registerServerCommandHandler(ALNetworkRouter.serverCommands.enterVehicle,
@@ -79,25 +97,43 @@ ALNetworkRouter.registerServerCommandHandler(ALNetworkRouter.serverCommands.ente
 --- Adds open door timed action to queue. Expected params: integer playerId, integer vehicleId, integer vehiclePartId
 ---@param args ALargsType
 local function addOpenVehicleDoorActionToQueue(args)
-    local playerObj = getPlayerByOnlineID(args.playerId --[[@as integer]])
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addOpenVehicleDoorActionToQueue handler - could not "
-            .. "find player with online playerId: " .. tostring(args.playerId))
+    local playerId = args.playerId --[[@as integer]]
+    if not playerId then
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
         return
     end
 
-    ---@diagnostic disable: undefined-global
-    local vehicleObj = VehicleManager.instance:getVehicleByID(args.vehicleId --[[@as integer]])
+    ---@type IsoPlayer
+    local playerObj = nil
+    if ALNetworkRouter:isSinglePlayerContext() then
+        playerObj = getSpecificPlayer(playerId)
+    else
+        playerObj = getPlayerByOnlineID(playerId)
+    end
+
+    local vehicleId = args.vehicleId --[[@as integer]]
+    if not vehicleId then
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addOpenVehicleDoorActionToQueue - args.vehicleId nil")
+        return
+    end
+
+    local vehicleObj = getVehicleById(vehicleId)
     if not vehicleObj then
-        print("[ERROR] AwesomeLockpicking.ALClientServerHandlers.addOpenVehicleDoorActionToQueue - could not get "
-        .. "vehicle from vehicleId: " .. tostring(args.vehicleId))
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addOpenVehicleDoorActionToQueue - could not get "
+            .. "vehicle from vehicleId: " .. tostring(vehicleId))
         return
     end
 
-    local vehiclePart = vehicle:getPartById(args.vehiclePartId --[[@as string]]) --[[@as VehiclePart]]
-    if not targetObj then
+    local vehiclePartId = args.vehiclePartId --[[@as string]]
+    if not vehiclePartId then
+        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.addOpenVehicleDoorActionToQueue - vehiclePartId nil")
+        return
+    end
+
+    local vehiclePart = vehicleObj:getPartById(vehiclePartId)
+    if not vehiclePart then
         print("[ERROR] AwesomeLockpicking.ALClientServerHandlers.addOpenVehicleDoorActionToQueue - could not get "
-        .. "vehicle part from vehiclePartId: " .. tostring(args.vehiclePartId))
+            .. "vehicle part from vehiclePartId: " .. tostring(args.vehiclePartId))
         return
     end
 

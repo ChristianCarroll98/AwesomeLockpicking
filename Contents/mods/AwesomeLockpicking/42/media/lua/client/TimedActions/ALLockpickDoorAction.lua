@@ -53,7 +53,7 @@ function ALLockpickDoorAction:perform()
     }
 
     if targetType == targetTypes.VehicleDoor then
-        args.vehicleId = target:getVehicle():getID()
+        args.vehicleId = target:getVehicle():getId()
         args.vehiclePartId = target:getId()
 
     elseif targetType == targetTypes.WorldDoor or targetType == targetTypes.PlayerDoor then
