@@ -15,6 +15,7 @@ local function setHaloNoteWarningHandler(args)
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
         return
     end
+
     local textTranslationKey = args.textTranslationKey --[[@as string]]
     if not textTranslationKey or textTranslationKey == "" then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.text nil or empty")
@@ -32,9 +33,6 @@ local function setHaloNoteWarningHandler(args)
         print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - could not find player "
             .. "with online Id: " .. tostring(playerId))
         return
-    elseif not textTranslationKey or textTranslationKey == "" then
-        print("[ERROR] AwesomeLockpicking.ALServerCommandHandlers.setHaloNoteWarning handler - text nil or empty")
-        return
     end
 
     local text = getText(textTranslationKey)
@@ -50,7 +48,7 @@ local function setHaloNoteWarningHandler(args)
     local g = math.floor(badColor:getG() * 255)
     local b = math.floor(badColor:getB() * 255)
 
-    playerObj:setHaloNote(textTranslationKey, r, g, b, 150.0)
+    playerObj:setHaloNote(text, r, g, b, 150.0)
 end
 ALNetworkRouter.registerServerCommandHandler(ALNetworkRouter.serverCommands.setHaloNoteWarning,
     setHaloNoteWarningHandler)
@@ -106,9 +104,10 @@ ALNetworkRouter.registerServerCommandHandler(ALNetworkRouter.serverCommands.ente
 --- Adds open door timed action to queue. Expected params: integer playerId, integer vehicleId, integer vehiclePartId
 ---@param args ALargsType
 local function addOpenVehicleDoorActionToQueue(args)
+    print("[DEBUG] AwesomeLockpicking.ALClientCommandHandlers.addOpenVehicleDoorActionToQueue")
     local playerId = args.playerId --[[@as integer]]
     if not playerId then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.setHaloNoteWarningHandler - args.playerId nil")
+        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.addOpenVehicleDoorActionToQueue - args.playerId nil")
         return
     end
 

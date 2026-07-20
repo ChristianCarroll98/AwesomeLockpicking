@@ -3,7 +3,12 @@ require 'ALSharedUtils'
 
 ---@const
 local settings = SandboxVars and SandboxVars.AwesomeLockpicking
-
+---@const
+local log = ALSharedUtils.log
+---@const
+local logLevel = ALSharedUtils.ALLogLevel
+---@const
+local fileName = "ALClientCommandHandlers"
 
 ---------- local const multiplier settings - subject to chance ----------
 
@@ -45,16 +50,17 @@ local XP_GAIN = 10.0
 ---@param target IsoDoor|IsoThumpable|VehiclePart|nil
 ---@return boolean
 local function isLockpickSuccess(playerObj, tool, target)
+    local contextStr = fileName .. ".isLockpickSuccess"
     if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - playerObj nil")
+        log("playerObj nil", logLevel.ERROR, contextStr)
         return false
     end
     if not tool then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - tool nil")
+        log("tool nil", logLevel.ERROR, contextStr)
         return false
     end
     if not target then
-        print("[ERROR] AwesomeLockpicking.ALSharedUtils.isLockpickSuccess - target invalid")
+        log("target nil", logLevel.ERROR, contextStr)
         return false
     end
 
@@ -67,7 +73,7 @@ local function isLockpickSuccess(playerObj, tool, target)
     if toolType == lockpickToolTypes.Professional then toolBonus = TOOL_MULT.PROFESSIONAL
     elseif toolType == lockpickToolTypes.Forged then toolBonus = TOOL_MULT.FORGED
     elseif toolType == lockpickToolTypes.Invalid then
-        print("[ERROR] AwesomeLockpicking.ALSharedUtils.isLockpickSuccess - lockpick tool type invalid")
+        log("lockpick tool type invalid", logLevel.ERROR, contextStr)
         return false
     end
 
@@ -96,7 +102,7 @@ local function isLockpickSuccess(playerObj, tool, target)
             end
         end
     elseif targetType == targetTypes.Invalid then
-        print("[ERROR] AwesomeLockpicking.ALSharedUtils.isLockpickSuccess - target type invalid")
+        log("targetType invalid", logLevel.ERROR, contextStr)
         return false
     end
 
@@ -106,13 +112,13 @@ local function isLockpickSuccess(playerObj, tool, target)
 
     finalChance = math.max(MIN_CHANCE, finalChance)
 
-    --[[ print("[DEBUG] AwesomeLockpicking.ALClientCommandHandlers.isLockpickSuccess - base*door*tool*sandbox = "
-        .. "successChance: " .. tostring(baseChance) .. "*" .. tostring(doorMultiplier) .. "*" .. tostring(toolBonus)
-        .. "*" .. tostring(sandboxMod) .. " = " .. tostring(finalChance)) ]]
+    log("base*door*tool*sandbox = successChance: " .. tostring(baseChance) .. "*" .. tostring(doorMultiplier) .. "*"
+        .. tostring(toolBonus) .. "*" .. tostring(sandboxMod) .. " = " .. tostring(finalChance), logLevel.DEBUG,
+        contextStr)
 
     return ZombRand(100) < finalChance
 end
-
+--ALTODONEXT - make the rest of the print statements my custom log, and also continue testing multiplayer
 
 --- Rolls for whether tool durability should be degraded based on player maintenance level and tool condition lower
 --- chance. If toolType is screwdriver, rolls for whether to delete a paperclip. SERVER ONLY
@@ -262,6 +268,9 @@ end
 --- vehiclePartId, or if WorldDoor or PlayerDoor: table<string, number>: {x, y, z} squarePos
 ---@param args ALargsType
 local function applyLockpickAttempt(args)
+    ---@const
+    local functionName = "applyLockpickAttempt"
+
     local playerId = args.playerId --[[@as integer]]
     if not playerId then
         print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.playerId nil")
