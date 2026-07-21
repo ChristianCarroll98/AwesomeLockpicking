@@ -1,9 +1,9 @@
 {
     "Sandbox_AwesomeLockpicking": "Awesome Lockpicking",
-    "Sandbox_SuccessChanceMultiplier": "Success chance multiplier",
+    "Sandbox_SuccessChanceMultiplier": "Success Chance Multiplier",
     "Sandbox_XPMultiplier": "XP Multiplier",
-    "Sandbox_AllowLockpickingVehicleDoors": "Allow Lockpicking of vehicle doors",
-    "Sandbox_AutoEnterOnLockpickingVehicleDoor": "Auto-enter vehicle on lockpicking vehicle door",
-    "Sandbox_AllowLockpickingHighSecurityDoors": "Allow Lockpicking of high-security doors",
-    "Sandbox_AllowLockpickingPlayerDoors": "Allow lockpicking of player-built doors"
+    "Sandbox_AllowLockpickingVehicleDoors": "Allow Lockpicking Vehicle Doors",
+    "Sandbox_AutoEnterOnLockpickingVehicleDoor": "Auto-Enter Picked Vehicle Doors",
+    "Sandbox_AllowLockpickingHighSecurityDoors": "Allow Lockpicking High-Security Doors",
+    "Sandbox_AllowLockpickingPlayerDoors": "Allow Lockpicking Player-Built Doors"
 }

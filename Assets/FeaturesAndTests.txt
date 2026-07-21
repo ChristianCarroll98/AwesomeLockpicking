@@ -1,8 +1,9 @@
-topic: project zomboid build 42.19 modding lua/zedscripts, Lockpicking mod AwesomeLockpicking on steam workshop; question: 
+topic: project zomboid build 42.19 modding lua/zedscripts, Lockpicking mod AwesomeLockpicking on steam workshop. Environment is VSCode with extensions Lua Language Server, Umbrella Lua API, and Zedscripts; question:
 
 TODO:
 Add handling for double doors
 fix opening trailer beds - wont automatically open after unlocking due to the way that the game handles them differently from other car trunks.
+better icons and add 3d models
 
 
 
@@ -20,7 +21,7 @@ Lockpick Vehicle Doors (front and passenger)
  - Can only pick front doors
 
 Lockpick vehicle Trunks
- - Automatically open trunk inventory UI
+ - Automatically open trunk inventory UI (SP only)
  
 Research Professional Tools at level 1 lockpicking or blacksmithing
 

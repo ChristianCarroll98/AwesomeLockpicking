@@ -233,7 +233,7 @@ local function tryAddVehicleLockpickOption(playerObj)
 
     menu:addSlice(
         getText(getContextTextFromLockpickingToolObj(tool)),
-        getTexture("textures/Vehicle_pick_lock.png"),
+        getTexture("media/textures/Vehicle_pick_lock.png"),
         addLockpickingTaskToQueue,
         playerObj,
         vehiclePart,
@@ -243,11 +243,19 @@ local function tryAddVehicleLockpickOption(playerObj)
 end
 
 
-local originalShowRadialMenuOutside = ISVehicleMenu.showRadialMenuOutside -- store original showRadialMenuOutside
+-- 1. Check if a backup ALREADY exists in the global table (from a previous load)
+-- This prevents overwriting the original function pointer on a hot-reload
+if not ISVehicleMenu._originalShowRadialMenuOutside then
+    ISVehicleMenu._originalShowRadialMenuOutside = ISVehicleMenu.showRadialMenuOutside
+end
+
+-- 2. Create a local reference pointing strictly to the TRUE vanilla function
+local originalShowRadialMenuOutside = ISVehicleMenu._originalShowRadialMenuOutside
+
 ---Overrides vanilla showRadialMenuOutside and calls tryAddVehicleLockpickingOption if vehicle lockpicking is enabled
 ---@param player IsoPlayer
 function ISVehicleMenu.showRadialMenuOutside(player) ---@diagnostic disable-line: duplicate-set-field
-    -- Call vanilla FIRST so the base menu (doors, trunk, etc.) is built
+    -- Call vanilla FIRST using the safe reference
     if originalShowRadialMenuOutside then
         originalShowRadialMenuOutside(player)
     end
