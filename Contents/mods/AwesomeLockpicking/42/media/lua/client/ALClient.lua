@@ -1,6 +1,9 @@
-local function ALOnServerCommand(module, serverCommand, args)
-    if module ~= ALNetworkRouter.MODULE_NAME then return end
+---@type ALNetworkRouter
+local net = require 'ALNetworkRouter'
 
-    ALNetworkRouter.handleServerCommand(serverCommand, args)
+local function ALOnServerCommand(module, serverCommand, args)
+    if module ~= net.MODULE_NAME then return end
+
+    net.handleServerCommand(serverCommand, args)
 end
 Events.OnServerCommand.Add(ALOnServerCommand)

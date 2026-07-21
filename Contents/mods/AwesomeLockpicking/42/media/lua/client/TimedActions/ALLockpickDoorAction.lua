@@ -1,6 +1,15 @@
 require "TimedActions/ISBaseTimedAction"
-require "ALSharedUtils"
--- require 'ALNetworkRouter' -- included in ALSharedUtils
+
+---@type ALSharedUtils
+local u = require 'ALSharedUtils'
+
+---@type ALNetworkRouter
+local net = require 'ALNetworkRouter'
+
+
+---@const
+local fileName = "ALLockpickDoorAction"
+
 
 ---@class ALLockpickDoorAction : ISBaseTimedAction
 ---@field character IsoPlayer
@@ -31,16 +40,14 @@ function ALLockpickDoorAction:stop()
 end
 
 function ALLockpickDoorAction:perform()
+    local contextStr = fileName .. "perform"
     local target = self.target
-    if not target then
-        print("[ERROR] AwesomeLockpicking.ALLockpickDoorAction.perform - target nil")
-        return
-    end
+    if not target then u.ALlog("self.target nil", u.ALLogLevel.ERROR, contextStr) return end
 
     local targetType = self.targetType
-    local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local targetTypes = u.LockpickableObjectTypes
     local playerId = -1
-    if ALNetworkRouter:isSinglePlayerContext() then
+    if net:isSinglePlayerContext() then
         playerId = self.character:getPlayerNum()
     else
         playerId = self.character:getOnlineID()
@@ -63,13 +70,13 @@ function ALLockpickDoorAction:perform()
             z = target:getZ()
         }
     elseif targetType == targetTypes.Invalid then
-        print("[ERROR] AwesomeLockpicking.ALLockpickDoorAction.perform - invalid target type")
+        u.ALlog("invalid target type: " .. tostring(targetType), u.ALLogLevel.ERROR, contextStr)
         return
     end
 
     -- Expected params: integer playerId, integer toolId, targetTypes targetType, if VehicleDoor: integer vehicleId and 
     -- string vehiclePartId, or if WorldDoor or PlayerDoor: table<string, number>: {x, y, z} squarePos
-    ALNetworkRouter.sendToServer(ALNetworkRouter.clientCommands.applyLockpickAttempt, args)
+    net.sendToServer(net.clientCommands.applyLockpickAttempt, args)
 
     ISBaseTimedAction.perform(self)
 end

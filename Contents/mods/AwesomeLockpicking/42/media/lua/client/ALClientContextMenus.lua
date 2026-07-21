@@ -1,8 +1,13 @@
 require 'TimedActions/ALLockpickDoorAction'
 require 'TimedActions/WalkToTimedAction'
-require 'ALNetworkRouter'
--- require 'Vehicles/ISUI/ISVehicleMenu' - already comes from ALSharedUtils
--- require 'ALSharedUtils' - already comes from ALLockpickDoorAction
+require 'Vehicles/ISUI/ISVehicleMenu'
+
+---@type ALSharedUtils
+local u = require 'ALSharedUtils'
+
+
+---@const
+local fileName = "ALClientContextMenus"
 
 ---------- General Helper Functions ----------
 
@@ -120,31 +125,31 @@ end
 ---@param target IsoObject
 ---@return targetTypes
 local function getIsoLockpickingTargetType(target)
-    if not target then return ALSharedUtils.LockpickableObjectTypes.Invalid end
+    if not target then return u.LockpickableObjectTypes.Invalid end
 
     if instanceof(target, "IsoDoor") and target--[[@as IsoDoor]]:isLocked() then
         local sprite = target:getSprite()
         local props = sprite and sprite:getProperties()
         if props and props:get("HighSecurity") == "true" then
             if settings and not settings.AllowLockpickingHighSecurityDoors then
-                return ALSharedUtils.LockpickableObjectTypes.Invalid
+                return u.LockpickableObjectTypes.Invalid
             end
         end
 
-        return ALSharedUtils.LockpickableObjectTypes.WorldDoor
+        return u.LockpickableObjectTypes.WorldDoor
     end
 
     if instanceof(target, "IsoThumpable") and target--[[@as IsoThumpable]].isDoor
         and target--[[@as IsoThumpable]]:isDoor() and target--[[@as IsoThumpable]]:isLocked() then
 
         if settings and not settings.AllowLockpickingPlayerDoors then
-            return ALSharedUtils.LockpickableObjectTypes.Invalid
+            return u.LockpickableObjectTypes.Invalid
         end
 
-        return ALSharedUtils.LockpickableObjectTypes.PlayerDoor
+        return u.LockpickableObjectTypes.PlayerDoor
     end
 
-    return ALSharedUtils.LockpickableObjectTypes.Invalid
+    return u.LockpickableObjectTypes.Invalid
 end
 
 
@@ -154,20 +159,19 @@ end
 ---@param worldobjects IsoObject[]
 ---@param test boolean
 local function addLockpickingContextMenuOption(player, context, worldobjects, test)
+    local contextStr = fileName .. ".addLockpickingContextMenuOption"
     -- If 'test' is true, the game is just validating if a menu should exist
     if test then return end
     if not worldobjects then return end -- no objects found
 
     local playerObj = getSpecificPlayer(player)
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking - player param nil in addLockpickingContextMenuOption")
-        return
-    end
+    if not playerObj then u.ALlog("could not get player from player number: " .. tostring(player),
+        u.ALLogLevel.ERROR, contextStr) return end
 
     local tool = getValidLockpickTool(playerObj)
     if not tool then return end -- no valid tool found
 
-    local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local targetTypes = u.LockpickableObjectTypes
 
     for _, target in ipairs(worldobjects) do
         local targetType = getIsoLockpickingTargetType(target)
@@ -233,7 +237,7 @@ local function tryAddVehicleLockpickOption(playerObj)
         addLockpickingTaskToQueue,
         playerObj,
         vehiclePart,
-        ALSharedUtils.LockpickableObjectTypes.VehicleDoor,
+        u.LockpickableObjectTypes.VehicleDoor,
         tool
     )
 end

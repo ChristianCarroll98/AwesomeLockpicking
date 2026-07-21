@@ -1,5 +1,6 @@
 require 'Vehicles/ISUI/ISVehicleMenu'
 
+---@class ALSharedUtils
 ALSharedUtils = ALSharedUtils or {}
 
 
@@ -45,7 +46,7 @@ local LogLevelStrings = {
 }
 
 ---@const
-local LOG_LEVEL = ALSharedUtils.ALLogLevel.TRACE -- ALTODO set manually before run? maybe add sandbox setting?
+local LOG_LEVEL = ALSharedUtils.ALLogLevel.DEBUG -- Only logs at this level and higher will print.
 ---@const
 local DEFAULT_LOG_LEVEL = ALSharedUtils.ALLogLevel.INFO
 
@@ -92,7 +93,7 @@ function ALSharedUtils.getTargetTypeFromObj(target)
 end
 
 
---- Internal parse function to hide visited and depth variables. ALTODO: not sure if safety checks actually work..
+--- Internal parse function to hide visited and depth variables.
 ---@param var any
 ---@param visited table? (Internal use only)
 ---@param depth number? (Internal use only)
@@ -109,14 +110,14 @@ local function parseToStringInternal(var, visited, depth)
 
     -- Hard safety cutoff for deeply nested structures
     if depth > 20 then
-        ALSharedUtils.log("Max recursion depth reached while parsing table", ALSharedUtils.ALLogLevel.WARN,
+        ALSharedUtils.ALlog("Max recursion depth reached while parsing table", ALSharedUtils.ALLogLevel.WARN,
             "ALSharedUtils.parseToStringInternal")
         return "<MaxDepthReached>"
     end
 
     -- Track circular dependencies to prevent stack overflow crashes
     if visited[var] then
-        ALSharedUtils.log("Circular dependency detected while parsing table", ALSharedUtils.ALLogLevel.WARN,
+        ALSharedUtils.ALlog("Circular dependency detected while parsing table", ALSharedUtils.ALLogLevel.WARN,
             "ALSharedUtils.parseToStringInternal")
         return "<Circular>"
     end
@@ -151,14 +152,16 @@ end
 ---@param var any
 ---@return string
 function ALSharedUtils.parseToString(var)
+    if type(var) == "string" then return var end
     return parseToStringInternal(var)
 end
+
 
 --- Custom function to print logs based on log severity level.
 ---@param content any
 ---@param logLevel? logLevels
 ---@param context? string
-function ALSharedUtils.log(content, logLevel, context)
+function ALSharedUtils.ALlog(content, logLevel, context)
     -- Handle missing log level safely
     logLevel = logLevel or DEFAULT_LOG_LEVEL
 
@@ -169,3 +172,6 @@ function ALSharedUtils.log(content, logLevel, context)
         print(LogLevelStrings[logLevel] .. "AwesomeLockpicking" .. contextStr .. ALSharedUtils.parseToString(content))
     end
 end
+
+
+return ALSharedUtils

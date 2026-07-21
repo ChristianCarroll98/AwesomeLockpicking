@@ -1,5 +1,9 @@
+---@type ALSharedUtils
+local u = require 'ALSharedUtils'
+
 ---------- define tables, const enums and vars, and types ----------
 
+---@class ALNetworkRouter
 ALNetworkRouter = ALNetworkRouter or {}
 ALNetworkRouter.serverCommandHandlers = ALNetworkRouter.serverCommandHandlers or {}
 ALNetworkRouter.clientCommandHandlers = ALNetworkRouter.clientCommandHandlers or {}
@@ -26,6 +30,8 @@ ALNetworkRouter.MODULE_NAME = "ALModule"
 ---@class ALargsType
 ---@field [string] string | number | integer | boolean | nil | ALargsType
 
+---@const
+local fileName = "ALNetworkRouter"
 
 --- Returns true if current context is singleplayer, otherwise false
 ---@return boolean
@@ -57,13 +63,13 @@ function ALNetworkRouter.handleServerCommand(serverCommand, args)
     if serverCommandHandler then
         serverCommandHandler(args)
     else
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.handleServerCommand - Received unregistered server command: "
-            .. tostring(serverCommand))
+        u.ALlog("Voiding received unregistered server command: " .. tostring(serverCommand),
+            u.ALLogLevel.WARN, fileName .. "handleServerCommand")
     end
 end
 
 
---- client -> server - process clent commands on the server. Do not call directly.
+--- client -> server - process client commands on the server. Do not call directly.
 ---@param clientCommand clientCommands
 ---@param args ALargsType
 function ALNetworkRouter.handleClientCommand(clientCommand, args)
@@ -72,8 +78,8 @@ function ALNetworkRouter.handleClientCommand(clientCommand, args)
     if clientCommandHandler then
         clientCommandHandler(args)
     else
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.handleClientCommand - Received unregistered client command: "
-            .. tostring(clientCommand))
+        u.ALlog("Voiding received unregistered client command: " .. tostring(clientCommand),
+            u.ALLogLevel.WARN, fileName .. "handleClientCommand")
     end
 end
 
@@ -82,10 +88,9 @@ end
 ---@param serverCommand serverCommands
 ---@param func fun(...): any
 function ALNetworkRouter.registerServerCommandHandler(serverCommand, func)
-    if ALNetworkRouter.serverCommandHandlers[serverCommand] then
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerServerCommandHandler - re-registering "
-            .. "server command: " .. tostring(serverCommand))
-    end
+    if ALNetworkRouter.serverCommandHandlers[serverCommand] then u.ALlog("re-registering server command: "
+        .. tostring(serverCommand), u.ALLogLevel.WARN, fileName .. "registerServerCommandHandler") end
+
     ALNetworkRouter.serverCommandHandlers[serverCommand] = func
 end
 
@@ -94,10 +99,9 @@ end
 ---@param clientCommand clientCommands
 ---@param func fun(...): any
 function ALNetworkRouter.registerClientCommandHandler(clientCommand, func)
-    if ALNetworkRouter.clientCommandHandlers[clientCommand] then
-        print("[WARN] AwesomeLockpicking.ALNetworkRouter.registerClientCommandHandler - re-registering "
-            .. "client command: " .. tostring(clientCommand))
-    end
+    if ALNetworkRouter.clientCommandHandlers[clientCommand] then u.ALlog("re-registering client command: "
+        .. tostring(clientCommand), u.ALLogLevel.WARN, fileName .. "registerClientCommandHandler") end
+
     ALNetworkRouter.clientCommandHandlers[clientCommand] = func
 end
 
@@ -113,8 +117,7 @@ function ALNetworkRouter.sendToServer(clientCommand, args)
         ALNetworkRouter.handleClientCommand(clientCommand, args)
 
     else
-        print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToServer - Unknown environment context, "
-            .. "sendToServer aborted")
+        u.ALlog("Unknown environment context, sendToServer aborted", u.ALLogLevel.ERROR, fileName .. "sendToServer")
     end
 end
 
@@ -124,19 +127,20 @@ end
 ---@param serverCommand serverCommands
 ---@param args ALargsType
 function ALNetworkRouter.sendToClient(playerObj, serverCommand, args)
+    local contextStr = fileName .. "sendToClient"
     if ALNetworkRouter.isPureServerContext() then
-        if not playerObj then
-            print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToClient - playerObj param nil in pure server "
-                .. "context, sendToClient aborted")
-            return
-        end
+        if not playerObj then u.ALlog("playerObj param nil in pure server context, sendToClient aborted",
+            u.ALLogLevel.ERROR, contextStr) return end
+
         sendServerCommand(playerObj, ALNetworkRouter.MODULE_NAME, serverCommand, args)
 
     elseif ALNetworkRouter.isSinglePlayerContext() or ALNetworkRouter.isPureClientContext() then
         ALNetworkRouter.handleServerCommand(serverCommand, args)
 
     else
-        print("[ERROR] AwesomeLockpicking.ALNetworkRouter.sendToClient - Unknown environment context, "
-            .. "sendToClient aborted")
-    end
+        u.ALlog("Unknown environment context, sendToClient aborted", u.ALLogLevel.ERROR, contextStr)
+   end
 end
+
+
+return ALNetworkRouter

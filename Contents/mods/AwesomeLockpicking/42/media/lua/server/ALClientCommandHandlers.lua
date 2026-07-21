@@ -1,12 +1,12 @@
-require 'ALSharedUtils'
--- require 'ALNetworkRouter' -- included in ALSharedUtils
+---@type ALSharedUtils
+local u = require 'ALSharedUtils'
+
+---@type ALNetworkRouter
+local net = require 'ALNetworkRouter'
 
 ---@const
 local settings = SandboxVars and SandboxVars.AwesomeLockpicking
----@const
-local log = ALSharedUtils.log
----@const
-local logLevel = ALSharedUtils.ALLogLevel
+
 ---@const
 local fileName = "ALClientCommandHandlers"
 
@@ -51,34 +51,22 @@ local XP_GAIN = 10.0
 ---@return boolean
 local function isLockpickSuccess(playerObj, tool, target)
     local contextStr = fileName .. ".isLockpickSuccess"
-    if not playerObj then
-        log("playerObj nil", logLevel.ERROR, contextStr)
-        return false
-    end
-    if not tool then
-        log("tool nil", logLevel.ERROR, contextStr)
-        return false
-    end
-    if not target then
-        log("target nil", logLevel.ERROR, contextStr)
-        return false
-    end
+    if not playerObj then u.ALlog("playerObj nil", u.ALLogLevel.ERROR, contextStr) return false end
+    if not tool then u.ALlog("tool nil", u.ALLogLevel.ERROR, contextStr) return false end
+    if not target then u.ALlog("target nil", u.ALLogLevel.ERROR, contextStr) return false end
 
     local baseChance = BASE_CHANCE + (playerObj:getPerkLevel(Perks.Lockpicking) * LEVEL_MULTIPLIER)
-
     local toolBonus = TOOL_MULT.SCREWDRIVER -- default for screwdriver
-    local toolType = ALSharedUtils.getLockpickToolTypeFromObj(tool)
-    local lockpickToolTypes = ALSharedUtils.LockpickToolTypes
+    local toolType = u.getLockpickToolTypeFromObj(tool)
+    local lockpickToolTypes = u.LockpickToolTypes
 
     if toolType == lockpickToolTypes.Professional then toolBonus = TOOL_MULT.PROFESSIONAL
     elseif toolType == lockpickToolTypes.Forged then toolBonus = TOOL_MULT.FORGED
-    elseif toolType == lockpickToolTypes.Invalid then
-        log("lockpick tool type invalid", logLevel.ERROR, contextStr)
-        return false
-    end
+    elseif toolType == lockpickToolTypes.Invalid then u.ALlog("lockpick tool type invalid", u.ALLogLevel.ERROR,
+        contextStr) return false end
 
-    local targetType = ALSharedUtils.getTargetTypeFromObj(target)
-    local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local targetType = u.getTargetTypeFromObj(target)
+    local targetTypes = u.LockpickableObjectTypes
     local doorMultiplier = DOOR_MULT.WOODEN -- default basic doors
     if targetType == targetTypes.VehicleDoor then
         doorMultiplier = DOOR_MULT.VEHICLE
@@ -102,7 +90,7 @@ local function isLockpickSuccess(playerObj, tool, target)
             end
         end
     elseif targetType == targetTypes.Invalid then
-        log("targetType invalid", logLevel.ERROR, contextStr)
+        u.ALlog("targetType invalid", u.ALLogLevel.ERROR, contextStr)
         return false
     end
 
@@ -112,33 +100,25 @@ local function isLockpickSuccess(playerObj, tool, target)
 
     finalChance = math.max(MIN_CHANCE, finalChance)
 
-    log("base*door*tool*sandbox = successChance: " .. tostring(baseChance) .. "*" .. tostring(doorMultiplier) .. "*"
-        .. tostring(toolBonus) .. "*" .. tostring(sandboxMod) .. " = " .. tostring(finalChance), logLevel.DEBUG,
+    u.ALlog("base*door*tool*sandbox = successChance: " .. tostring(baseChance) .. "*" .. tostring(doorMultiplier) .. "*"
+        .. tostring(toolBonus) .. "*" .. tostring(sandboxMod) .. " = " .. tostring(finalChance), u.ALLogLevel.TRACE,
         contextStr)
 
     return ZombRand(100) < finalChance
 end
---ALTODONEXT - make the rest of the print statements my custom log, and also continue testing multiplayer
+
 
 --- Rolls for whether tool durability should be degraded based on player maintenance level and tool condition lower
 --- chance. If toolType is screwdriver, rolls for whether to delete a paperclip. SERVER ONLY
 ---@param tool InventoryItem
 ---@param success boolean
 local function tryReduceToolDurability(playerObj, tool, success)
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.tryReduceToolDurability - playerObj nil")
-        return false
-    end
-    if not tool then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.tryReduceToolDurability - tool nil")
-        return false
-    end
+    local contextStr = fileName .. ".tryReduceToolDurability"
+    if not playerObj then u.ALlog("playerObj nil", u.ALLogLevel.ERROR, contextStr) return false end
+    if not tool then u.ALlog("tool nil", u.ALLogLevel.ERROR, contextStr) return false end
 
     local inv = playerObj:getInventory()
-    if not inv then
-        print("[ERROR] AwesomeLockpicking.ALSharedUtils.tryReduceToolDurability - could not get player inventory")
-        return
-    end
+    if not inv then u.ALlog("could not get player inventory", u.ALLogLevel.ERROR, contextStr) return false end
 
     if tool.getCondition and tool:getCondition() > 0 then
 
@@ -157,13 +137,10 @@ local function tryReduceToolDurability(playerObj, tool, success)
         end
     end
 
-    if ALSharedUtils.getLockpickToolTypeFromObj(tool) == ALSharedUtils.LockpickToolTypes.Screwdriver then
+    if u.getLockpickToolTypeFromObj(tool) == u.LockpickToolTypes.Screwdriver then
         local paperclip = inv:getFirstTypeRecurse("Base.Paperclip")
-        if not paperclip then
-            print("[ERROR] AwesomeLockpicking.ALSharedUtils.tryReduceToolDurability - tool is screwdriver but could "
-                .. "not find paperclip")
-            return
-        end
+        if not paperclip then u.ALlog("tool is screwdriver but could not find paperclip", u.u.ALLogLevel.WARN,
+            contextStr) return end
         -- paperclip removal 10% chance on success, 25% chance on failure
         local removePaperclipChance = success and 10 or 25
         if ZombRand(100) < removePaperclipChance then
@@ -177,10 +154,9 @@ end
 ---@param vehiclePart VehiclePart
 ---@return integer
 local function getSeatIndexFromPart(vehiclePart)
-    if not vehiclePart then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.getSeatIndexFromPart - vehiclePart nil")
-        return -1
-    end
+    local contextStr = fileName .. "getSeatIndexFromPart"
+    if not vehiclePart then u.ALlog("vehiclePart nil", u.ALLogLevel.ERROR, contextStr) return -1 end
+
     local vehicle = vehiclePart:getVehicle()
     if not vehicle then return -1 end
 
@@ -200,32 +176,19 @@ end
 ---@param vehicle BaseVehicle
 ---@param vehiclePartId string
 local function handleVehiclePart(playerObj, vehicle, vehiclePartId)
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - playerObj nil")
-        return
-    end
-    if not vehicle then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - vehicle nil")
-        return
-    end
+    local contextStr = fileName .. ".handleVehiclePart"
+    if not playerObj then u.ALlog("playerObj nil", u.ALLogLevel.ERROR, contextStr) return false end
+    if not vehicle then u.ALlog("vehicle nil", u.ALLogLevel.ERROR, contextStr) return false end
     if not vehiclePartId or vehiclePartId == "" then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - vehiclePartId nil or empty")
-        return
-    end
+        u.ALlog("vehiclePartId nil or empty", u.ALLogLevel.ERROR, contextStr) return false end
 
     local vehiclePart = vehicle:getPartById(vehiclePartId)
-    if not vehiclePart then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - could not get vehicle part from "
-            .. "part ID: " .. tostring(vehiclePartId))
-        return
-    end
+    if not vehiclePart then u.ALlog("could not get vehicle part from part ID: " .. tostring(vehiclePartId),
+        u.ALLogLevel.ERROR, contextStr) return false end
 
     local vehicleDoor = vehiclePart.getDoor and vehiclePart:getDoor()
-    if not vehicleDoor then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.handleVehiclePart - part " .. tostring(vehiclePartId)
-            .. " has no door")
-        return
-    end
+    if not vehicleDoor then u.ALlog("vehicle part " .. tostring(vehiclePartId) .. " has no door",
+        u.ALLogLevel.ERROR, contextStr) return false end
 
     vehicleDoor:setLocked(false)
     -- vehicle:transmitPartDoor(target) -- required?? ALTODO
@@ -235,9 +198,9 @@ local function handleVehiclePart(playerObj, vehicle, vehiclePartId)
     if area == "TruckBed" then -- unlocking a trunk
         local truckBed = vehicle:getPartById("TruckBed")
         if truckBed and truckBed:getItemContainer() then
-            ALNetworkRouter.sendToClient( -- tell client to open trunk
+            net.sendToClient( -- tell client to open trunk
                 playerObj,
-                ALNetworkRouter.serverCommands.openVehicleDoor,
+                net.serverCommands.openVehicleDoor,
                 { -- Expected params: integer playerId, integer vehicleId, integer vehiclePartId
                     playerId = playerObj:getOnlineID(),
                     vehicleId = vehicle:getId(),
@@ -246,18 +209,19 @@ local function handleVehiclePart(playerObj, vehicle, vehiclePartId)
             )
         end
     elseif settings and settings.AutoEnterOnLockpickingVehicleDoor then -- unlocking a door
-        -- ALTODO - might move getSeatIndexFromPart into this file
         local seatIndex = getSeatIndexFromPart(vehiclePart)
         if seatIndex > -1 then
-            ALNetworkRouter.sendToClient( -- tell client to enter the vehicle at that seat index
+            net.sendToClient( -- tell client to enter the vehicle at that seat index
                 playerObj,
-                ALNetworkRouter.serverCommands.enterVehicle,
+                net.serverCommands.enterVehicle,
                 { -- Expected params: integer playerId, integer vehicleId, integer seatIndex
                     playerId = playerObj:getOnlineID(),
                     vehicleId = vehicle:getId(),
                     seatIndex = seatIndex
                 }
             )
+        else
+            u.ALlog("seatIndex invalid (-1) when sending enter vehicle command", u.ALLogLevel.WARN, contextStr)
         end
     end
 end
@@ -269,44 +233,30 @@ end
 ---@param args ALargsType
 local function applyLockpickAttempt(args)
     ---@const
-    local functionName = "applyLockpickAttempt"
+    local contextStr = fileName .. ".applyLockpickAttempt"
 
     local playerId = args.playerId --[[@as integer]]
-    if not playerId then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.playerId nil")
-        return
-    end
+    if not playerId then u.ALlog("args.playerId nil", u.ALLogLevel.ERROR, contextStr) return end
     local toolId = args.toolId --[[@as integer]]
-    if not toolId then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.toolId nil")
-        return
-    end
+    if not toolId then u.ALlog("args.toolId nil", u.ALLogLevel.ERROR, contextStr) return end
     local targetType = args.targetType --[[@as targetTypes]]
-    if not targetType then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.targetType nil")
-        return
-    end
+    if not targetType then u.ALlog("args.targetType nil", u.ALLogLevel.ERROR, contextStr) return end
+
     ---@type IsoPlayer
     local playerObj = nil
-    if ALNetworkRouter:isSinglePlayerContext() then
+    if net:isSinglePlayerContext() then
         playerObj = getSpecificPlayer(playerId)
     else
         playerObj = getPlayerByOnlineID(playerId)
     end
-    if not playerObj then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - Could not retrieve player "
-        .. "from player online ID: " .. tostring(playerId))
-        return
-    end
+    if not playerObj then u.ALlog("could not get playerObj from playerId: " .. tostring(playerId), u.ALLogLevel.ERROR,
+        contextStr) return end
 
     local tool = playerObj:getInventory():getItemWithID(toolId)
-    if not tool then
-        print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get tool from "
-            .. "toolId: " .. tostring(toolId))
-        return
-    end
+    if not tool then u.ALlog("could not get tool from toolId: " .. tostring(tool), u.ALLogLevel.ERROR,
+        contextStr) return end
 
-    local targetTypes = ALSharedUtils.LockpickableObjectTypes
+    local targetTypes = u.LockpickableObjectTypes
     ---@type IsoDoor|IsoThumpable|VehiclePart
     local targetObj = nil
     ---@type BaseVehicle
@@ -315,54 +265,29 @@ local function applyLockpickAttempt(args)
     -- get target object based on type
     if targetType == targetTypes.VehicleDoor then
         local vehicleId = args.vehicleId --[[@as integer]]
-        if not vehicleId then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehicleId nil")
-            return
-        end
+        if not vehicleId then u.ALlog("args.vehicleId nil", u.ALLogLevel.ERROR, contextStr) return end
 
         vehicleObj = getVehicleById(vehicleId)
-        if not vehicleObj then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
-            .. "from vehicleId: " .. tostring(vehicleId))
-            return
-        end
+        if not vehicleObj then u.ALlog("could not get vehicleObj from vehicleId: " .. tostring(vehicleId),
+            u.ALLogLevel.ERROR, contextStr) return end
 
         local vehiclePartId = args.vehiclePartId --[[@as string]]
-        if not vehiclePartId then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehiclePartId nil")
-            return
-        end
-
-        if not vehiclePartId or vehiclePartId == "" then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - args.vehiclePartId "
-                .. "nil or empty")
-            return
-        end
+        if not vehiclePartId then u.ALlog("args.vehiclePartId nil", u.ALLogLevel.ERROR, contextStr) return end
+        if vehiclePartId == "" then u.ALlog("args.vehiclePartId empty", u.ALLogLevel.ERROR, contextStr) return end
 
         targetObj = vehicleObj:getPartById(vehiclePartId)
-        if not targetObj then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not get vehicle "
-            .. "part from Id")
-            return
-        end
-    elseif targetType == targetTypes.PlayerDoor
-        or targetType == targetTypes.WorldDoor then
+        if not targetObj then u.ALlog("could not get part from vehiclePartId: " .. tostring(vehiclePartId),
+            u.ALLogLevel.ERROR, contextStr) return end
+
+    elseif targetType == targetTypes.PlayerDoor or targetType == targetTypes.WorldDoor then
 
         local pos = args.squarePos --[[@as table<string, number>]]
-        if not pos then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - pos table nil")
-            return
-        elseif not pos.x or not pos.y or not pos.z then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - pos.x/y/z nil")
-            return
-        end
+        if not pos then u.ALlog("args.squarePos nil", u.ALLogLevel.ERROR, contextStr) return end
+        if not pos.x or not pos.y or not pos.z then u.ALlog("pos.x/y/z nil", u.ALLogLevel.ERROR, contextStr) return end
 
         local square = getCell():getGridSquare(pos.x, pos.y, pos.z)
-        if not square then
-            print("[ERROR] AwesomeLockpicking.ALClientCommandHandlers.applyLockpickAttempt - could not find grid "
-                .. "square for door target")
-            return
-        end
+        if not square then u.ALlog("could not find grid square for door target", u.ALLogLevel.ERROR,
+            contextStr) return end
 
         local objects = square:getObjects()
         for i = 0, objects:size() - 1 do
@@ -377,6 +302,9 @@ local function applyLockpickAttempt(args)
                 targetObj = obj --[[@as IsoThumpable]]
             end
         end
+
+        if not targetObj then u.ALlog("could not find door at square: " .. u.parseToString(pos),
+            u.ALLogLevel.ERROR, contextStr) return end
     end
 
     local success = isLockpickSuccess(playerObj, tool, targetObj)
@@ -395,9 +323,9 @@ local function applyLockpickAttempt(args)
             if targetObj.ToggleDoor then targetObj :ToggleDoor(playerObj) end -- both PlayerDoor and WorldDoor
         end
     else
-        ALNetworkRouter.sendToClient( -- tell client to display failed halo text
+        net.sendToClient( -- tell client to display failed halo text. ALTODO: bugged in MP, Indie Stone's fault??
             playerObj,
-            ALNetworkRouter.serverCommands.setHaloNoteWarning,
+            net.serverCommands.setHaloNoteWarning,
             {
                 playerId = playerId,
                 textTranslationKey = "IGUI_ingame_LockpickingTaskFailed"
@@ -409,7 +337,6 @@ local function applyLockpickAttempt(args)
     local successXPMultiplier = success and 1.0 or 2.0
 
     playerObj:getXp():AddXP(Perks.Lockpicking, settings.XPMultiplier * XP_GAIN * successXPMultiplier, false, true,
-        ALNetworkRouter.isPureServerContext())
+        net.isPureServerContext())
 end
-ALNetworkRouter.registerClientCommandHandler(ALNetworkRouter.clientCommands.applyLockpickAttempt,
-    applyLockpickAttempt)
+net.registerClientCommandHandler(net.clientCommands.applyLockpickAttempt, applyLockpickAttempt)
