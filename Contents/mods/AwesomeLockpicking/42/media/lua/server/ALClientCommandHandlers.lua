@@ -139,10 +139,10 @@ local function tryReduceToolDurability(playerObj, tool, success)
 
     if u.getLockpickToolTypeFromObj(tool) == u.LockpickToolTypes.Screwdriver then
         local paperclip = inv:getFirstTypeRecurse("Base.Paperclip")
-        if not paperclip then u.ALlog("tool is screwdriver but could not find paperclip", u.u.ALLogLevel.WARN,
+        if not paperclip then u.ALlog("tool is screwdriver but could not find paperclip", u.ALLogLevel.WARN,
             contextStr) return end
-        -- paperclip removal 10% chance on success, 25% chance on failure
-        local removePaperclipChance = success and 10 or 25
+        -- paperclip removal 7% chance on success, 15% chance on failure
+        local removePaperclipChance = success and 7 or 15
         if ZombRand(100) < removePaperclipChance then
             inv:Remove(paperclip)
         end
