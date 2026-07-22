@@ -123,3 +123,62 @@ local function addOpenVehicleDoorActionToQueue(args)
     ISTimedActionQueue.add(openVehicleDoorAction)
 end
 net.registerServerCommandHandler(net.serverCommands.openVehicleDoor, addOpenVehicleDoorActionToQueue)
+
+
+--- Adds open door timed action to queue. Expected params: integer playerId, targetTypes targetType, 
+--- table<string, number>: {x, y, z} squarePos,
+---@param args ALargsType
+local function addOpenDoorActionToQueue(args)
+    local contextStr = fileName .. ".addOpenDoorActionToQueue"
+    u.ALlog("called", u.ALLogLevel.DEBUG, contextStr)
+
+    local targetType = args.targetType --[[@as targetTypes]]
+    if not targetType then u.ALlog("args.targetType nil", u.ALLogLevel.ERROR, contextStr) return end
+
+    local playerId = args.playerId --[[@as integer]]
+    if not playerId then u.ALlog("args.playerId nil", u.ALLogLevel.ERROR, contextStr) return end
+
+    ---@type IsoPlayer
+    local playerObj = nil
+    if net:isSinglePlayerContext() then
+        playerObj = getSpecificPlayer(playerId)
+    else
+        playerObj = getPlayerByOnlineID(playerId)
+    end
+    if not playerObj then u.ALlog("could not get playerObj from playerId: " .. tostring(playerId), u.ALLogLevel.ERROR,
+        contextStr) return end
+
+    local pos = args.squarePos --[[@as table<string, number>]]
+    if not pos then u.ALlog("args.squarePos nil", u.ALLogLevel.ERROR, contextStr) return end
+    if not pos.x or not pos.y or not pos.z then u.ALlog("pos.x/y/z nil", u.ALLogLevel.ERROR, contextStr) return end
+
+    local square = getCell():getGridSquare(pos.x, pos.y, pos.z)
+    if not square then u.ALlog("could not find grid square for door target", u.ALLogLevel.ERROR,
+        contextStr) return end
+
+    ---@type IsoDoor|IsoThumpable
+    local doorObj = nil
+    local objects = square:getObjects()
+    for i = 0, objects:size() - 1 do
+        local obj = objects:get(i)
+
+        if (targetType == u.LockpickableObjectTypes.WorldDoor and instanceof(obj, "IsoDoor")) then
+            doorObj = obj --[[@as IsoDoor]]
+            u.ALlog("found IsoDoor at " .. u.parseToString(pos), u.ALLogLevel.DEBUG, contextStr)
+
+        elseif (targetType == u.LockpickableObjectTypes.PlayerDoor and instanceof(obj, "IsoThumpable") and
+            obj--[[@as IsoThumpable]].isDoor and obj--[[@as IsoThumpable]]:isDoor()) then
+
+            doorObj = obj --[[@as IsoThumpable]]
+            u.ALlog("found IsoThumpable door at " .. u.parseToString(pos), u.ALLogLevel.DEBUG, contextStr)
+        end
+    end
+
+    if not doorObj then u.ALlog("could not find door at square: " .. u.parseToString(pos),
+        u.ALLogLevel.ERROR, contextStr) return end
+
+    u.ALlog("adding openDoorAction to queue", u.ALLogLevel.DEBUG, contextStr)
+    local openDoorAction = ISOpenCloseDoor:new(playerObj, doorObj)
+    ISTimedActionQueue.add(openDoorAction)
+end
+net.registerServerCommandHandler(net.serverCommands.openDoor, addOpenDoorActionToQueue)

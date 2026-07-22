@@ -313,14 +313,27 @@ local function applyLockpickAttempt(args)
     if success then -- unlock and open doors.
         if targetType == targetTypes.VehicleDoor then
             handleVehiclePart(playerObj, vehicleObj, args.vehiclePartId --[[@as string]])
-        else
-            if targetType == targetTypes.PlayerDoor and targetObj.setIsLocked then
-                targetObj:setIsLocked(false)
-                targetObj:syncIsoThumpable()
-            elseif targetType == targetTypes.WorldDoor then
-                if targetObj.setLockedByKey then targetObj:setLockedByKey(false) end
-            end
-            if targetObj.ToggleDoor then targetObj :ToggleDoor(playerObj) end -- both PlayerDoor and WorldDoor
+
+        elseif targetType == targetTypes.PlayerDoor or targetType == targetTypes.WorldDoor then
+            if targetObj.setIsLocked then targetObj:setIsLocked(false) end
+            if targetObj.syncIsoThumpable then targetObj:syncIsoThumpable() end
+            if targetObj.setLockedByKey then targetObj:setLockedByKey(false) end
+
+            net.sendToClient( -- tell client to display failed halo text. ALTODO: bugged in MP, Indie Stone's fault??
+                playerObj,
+                net.serverCommands.openDoor,
+                {
+                    playerId = playerId,
+                    targetType = targetType,
+                    squarePos = {
+                        x = targetObj:getX(),
+                        y = targetObj:getY(),
+                        z = targetObj:getZ()
+                    }
+                }
+            )
+
+            -- if targetObj.ToggleDoor then targetObj:ToggleDoor(playerObj) end
         end
     else
         net.sendToClient( -- tell client to display failed halo text. ALTODO: bugged in MP, Indie Stone's fault??

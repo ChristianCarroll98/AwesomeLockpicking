@@ -20,7 +20,8 @@ ALNetworkRouter.clientCommands = {
 ALNetworkRouter.serverCommands = {
     setHaloNoteWarning = "setHaloNoteWarning",
     enterVehicle = "enterVehicle",
-    openVehicleDoor = "openVehicleDoor"
+    openVehicleDoor = "openVehicleDoor",
+    openDoor = "openDoor"
 }
 
 ---@const
