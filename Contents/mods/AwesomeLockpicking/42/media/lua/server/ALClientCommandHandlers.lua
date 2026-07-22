@@ -314,9 +314,9 @@ local function applyLockpickAttempt(args)
         if targetType == targetTypes.VehicleDoor then
             handleVehiclePart(playerObj, vehicleObj, args.vehiclePartId --[[@as string]])
         else
-            if targetType == targetTypes.PlayerDoor then
-                if targetObj.setIsLocked then targetObj:setIsLocked(false) end
-
+            if targetType == targetTypes.PlayerDoor and targetObj.setIsLocked then
+                targetObj:setIsLocked(false)
+                targetObj:syncIsoThumpable()
             elseif targetType == targetTypes.WorldDoor then
                 if targetObj.setLockedByKey then targetObj:setLockedByKey(false) end
             end

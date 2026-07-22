@@ -46,7 +46,7 @@ local LogLevelStrings = {
 }
 
 ---@const
-local LOG_LEVEL = ALSharedUtils.ALLogLevel.DEBUG -- Only logs at this level and higher will print.
+local LOG_LEVEL = ALSharedUtils.ALLogLevel.WARN -- Only logs at this level and higher will print.
 ---@const
 local DEFAULT_LOG_LEVEL = ALSharedUtils.ALLogLevel.INFO
 
